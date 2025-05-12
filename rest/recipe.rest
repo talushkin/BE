@@ -1,0 +1,33 @@
+### Get all recipes
+GET http://localhost:3000/api/recipes
+Authorization: Bearer 1234
+
+###
+
+### Create recipe
+POST http://localhost:3000/api/recipes
+Content-Type: application/json
+Authorization: Bearer 1234
+
+{
+  "title": "Pasta",
+  "ingredients": ["noodles", "tomato sauce"],
+  "categoryId": "682073d369d00d85e56b06d5"
+}
+
+###
+
+### Update recipe
+PUT http://localhost:3000/api/recipes/68205cfff94da516687c5924
+Content-Type: application/json
+Authorization: Bearer 1234
+
+{
+  "title": "Updated Pasta"
+}
+
+###
+
+### Delete recipe
+DELETE http://localhost:3000/recipes/68205cfff94da516687c5923
+Authorization: Bearer 1234

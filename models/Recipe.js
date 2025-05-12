@@ -7,7 +7,7 @@ const recipeSchema = new mongoose.Schema({
     categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
     imageUrl: String,
     translated: { type: Boolean, default: false },
-    language: { type: String, default: "he" },
+    language: { type: String, default: "en" },
     createdAt: { type: Date, default: Date.now }
 });
 

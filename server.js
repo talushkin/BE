@@ -1,12 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-
-const recipeRoutes = require("./routes/recipeRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
+require("dotenv").config({ path: "./config/.env" }); // 👈 טוען את הקובץ הנכון
+const categoryRoutes = require("./routes/categoriesRoutes");
+const recipeRoutes = require("./routes/recipesRoutes");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());

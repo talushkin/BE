@@ -1,0 +1,33 @@
+### Get all categories
+GET http://localhost:3000/api/categories
+Authorization: Bearer 1234
+
+###
+
+### Create category
+POST http://localhost:3000/api/categories
+Content-Type: application/json
+Authorization: Bearer 1234
+
+{
+  "name": "Main Course",
+  "priority": -1,
+  "createdAt": "11-05-2025",
+}
+
+###
+
+### Update category
+PUT http://localhost:3000/api/categories/68205bf5f94da516687c5921
+Content-Type: application/json
+Authorization: Bearer 1234
+
+{
+  "name": "Updated Main Course"
+}
+
+###
+
+### Delete category
+DELETE http://localhost:3000/api/categories/68205bf5f94da516687c5921
+Authorization: Bearer 1234

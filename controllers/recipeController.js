@@ -6,14 +6,49 @@ exports.getAllRecipes = async (req, res) => {
 };
 
 exports.createRecipe = async (req, res) => {
-    const recipe = new Recipe(req.body);
-    await recipe.save();
-    res.status(201).json(recipe);
+    try {
+        const recipe = new Recipe(req.body);
+        await recipe.save();
+        res.status(201).json(recipe);
+    } catch (err) {
+        if (err.name === "ValidationError") {
+            const errors = Object.entries(err.errors).map(([field, error]) => ({
+                field,
+                message: error.message,
+                expected: error.kind,
+                got: typeof req.body[field]
+            }));
+            return res.status(400).json({
+                error: "Validation failed",
+                details: errors
+            });
+        }
+        res.status(500).json({ error: "Server error" });
+    }
 };
 
 exports.updateRecipe = async (req, res) => {
-    const recipe = await Recipe.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(recipe);
+    try {
+        const recipe = await Recipe.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        });
+        res.json(recipe);
+    } catch (err) {
+        if (err.name === "ValidationError") {
+            const errors = Object.entries(err.errors).map(([field, error]) => ({
+                field,
+                message: error.message,
+                expected: error.kind,
+                got: typeof req.body[field]
+            }));
+            return res.status(400).json({
+                error: "Validation failed",
+                details: errors
+            });
+        }
+        res.status(500).json({ error: "Server error" });
+    }
 };
 
 exports.deleteRecipe = async (req, res) => {
