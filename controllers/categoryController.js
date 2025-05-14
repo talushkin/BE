@@ -1,7 +1,7 @@
 const Category = require("../models/Category");
 
 exports.getAllCategories = async (req, res) => {
-    const categories = await Category.find();
+    const categories = await Category.find().sort({priority:1});
     res.json(categories);
 };
 

@@ -1,11 +1,11 @@
 ### Get all categories
-GET http://localhost:3000/api/categories
+GET http://localhost:5000/api/categories
 Authorization: Bearer 1234
 
 ###
 
 ### Create category
-POST http://localhost:3000/api/categories
+POST http://localhost:5000/api/categories
 Content-Type: application/json
 Authorization: Bearer 1234
 
@@ -18,7 +18,7 @@ Authorization: Bearer 1234
 ###
 
 ### Update category
-PUT http://localhost:3000/api/categories/68205bf5f94da516687c5921
+PUT http://localhost:5000/api/categories/68205bf5f94da516687c5921
 Content-Type: application/json
 Authorization: Bearer 1234
 

@@ -18,5 +18,5 @@ Authorization: Bearer 1234
 Content-Type: application/json
 
 {
-  "text": "American Steak"
+  "text": "italian pizza margarita"
 }

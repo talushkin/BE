@@ -4,10 +4,14 @@ const axios = require("axios"); // Ensure you have axios installed
 const dotenv = require("dotenv");
 dotenv.config({ path: "../config/.env" });
 
+// Instead of the default upload function, we now destructure 
+// uploadBufferToS3 from the utils file.
+const { uploadBufferToS3 } = require("../utils/uploadToS3");
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = process.env.OPENAI_API_URL;
 
-exports.translateDirectly = async (text, targetLanguage = "en" ) => {
+exports.translateDirectly = async (text, targetLanguage = "en") => {
   try {
     const prompt = `Translate the following text to ${targetLanguage}:\n"${text}"`;
 
@@ -60,30 +64,32 @@ exports.createPictureFromText = async (text) => {
     );
 
     const imageUrl = response.data.data[0]?.url;
-
     if (!imageUrl) {
       throw new Error("Failed to generate image");
     }
 
     // Fetch the image data using axios
     const imageResponse = await axios.get(imageUrl, { responseType: "arraybuffer" });
-
     if (imageResponse.status !== 200) {
       throw new Error("Failed to download the image");
     }
-
     const imageBuffer = Buffer.from(imageResponse.data);
 
-    // Save the image to the /images folder
+    // Save the image locally to the /images folder
     const imagesFolder = path.join(__dirname, "../images");
     if (!fs.existsSync(imagesFolder)) {
-      fs.mkdirSync(imagesFolder); // Create the folder if it doesn't exist
+      fs.mkdirSync(imagesFolder, { recursive: true });
     }
-
-    const imagePath = path.join(imagesFolder, `${Date.now()}-generated-image.png`);
+    // Encode the text to create a URL-safe filename
+    const encodedText = encodeURIComponent(text);
+    const filename = `${encodedText}-generated-image.png`;
+    const imagePath = path.join(imagesFolder, filename);
     fs.writeFileSync(imagePath, imageBuffer);
 
-    return { imageUrl, savedPath: imagePath };
+    // Upload the image buffer to S3 using the uploadBufferToS3 utility
+    const s3Url = await uploadBufferToS3(imageBuffer, filename);
+    console.log("S3 URL:", s3Url);
+    return { imageUrl: s3Url, savedPath: imagePath };
   } catch (error) {
     console.error(error);
     throw new Error("Image generation and saving failed");
