@@ -1,0 +1,22 @@
+@baseUrl = http://localhost:5000
+
+### Get translation for text
+POST {{baseUrl}}/api/ai/translate
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "text": "Hello, how are you?",
+  "targetLanguage": "es"
+}
+
+###
+
+### Create picture from text
+POST {{baseUrl}}/api/ai/image
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "text": "American Steak"
+}
