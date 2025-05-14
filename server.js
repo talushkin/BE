@@ -21,6 +21,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/recipes", {
 }).then(() => console.log("MongoDB connected"))
   .catch(err => console.log(err));
 
+app.get("/", (req, res) => res.status(200).send("BE Server Recipes Tal Arnon node is Running!"));
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/ai", openAIRoutes);
