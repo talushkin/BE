@@ -1,11 +1,13 @@
+@baseUrl = https://be-tan-theta.vercel.app
+
 ### Get all categories
-GET http://localhost:5000/api/categories
+GET {{baseUrl}}/api/categories
 Authorization: Bearer 1234
 
 ###
 
 ### Create category
-POST http://localhost:5000/api/categories
+POST {{baseUrl}}/api/categories
 Content-Type: application/json
 Authorization: Bearer 1234
 
@@ -18,7 +20,7 @@ Authorization: Bearer 1234
 ###
 
 ### Update category
-PUT http://localhost:5000/api/categories/68205bf5f94da516687c5921
+PUT {{baseUrl}}/api/categories/68205bf5f94da516687c5921
 Content-Type: application/json
 Authorization: Bearer 1234
 

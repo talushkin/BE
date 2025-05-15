@@ -1,4 +1,5 @@
-@baseUrl = http://localhost:5000
+@localUrl = http://localhost:5000
+@baseUrl = https://be-tan-theta.vercel.app
 
 ### Get translation for text
 POST {{baseUrl}}/api/ai/translate
@@ -13,10 +14,20 @@ Content-Type: application/json
 ###
 
 ### Create picture from text
-POST {{baseUrl}}/api/ai/image
+POST {{localUrl}}/api/ai/image
 Authorization: Bearer 1234
 Content-Type: application/json
 
 {
-  "text": "italian pizza margarita"
+  "text": "margin for background lettuce leaves on the left"
+}
+
+### Create text for recipe from title
+POST {{localUrl}}/api/ai/fill-recipe
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "recipeId": "6824b89071230ea2707f2280",
+  "title": "italian pizza margarita"
 }

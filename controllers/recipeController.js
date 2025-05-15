@@ -53,6 +53,7 @@ exports.updateRecipe = async (req, res) => {
 };
 
 exports.deleteRecipe = async (req, res) => {
+    console.log("deleting recipe ID:", req.params.id);
     await Recipe.findByIdAndDelete(req.params.id);
     res.sendStatus(204);
 };
