@@ -9,7 +9,7 @@ module.exports = function (req, res, next) {
 
     const token = authHeader.split(" ")[1];
     if (token !== process.env.TOKEN) {
-        return res.status(403).json({ error: "Invalid token:"+process.env.TOKEN });
+        return res.status(403).json({ error: "Invalid token" });
     }
 
     next();

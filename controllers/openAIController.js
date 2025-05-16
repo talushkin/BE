@@ -73,8 +73,8 @@ exports.createPictureFromText = async (text) => {
     // Replace text spaces or special characters to "-" on filename
     const sanitizedText = text.replace(/[^a-zA-Z0-9]/g, '-');
     const filename = `${sanitizedText}-generated-image.png`;
-    const imagePath = path.join(imagesFolder, filename);
-    fs.writeFileSync(imagePath, imageBuffer);
+    // const imagePath = path.join(imagesFolder, filename);
+    // fs.writeFileSync(imagePath, imageBuffer);
     // Upload the image buffer to S3 using the uploadBufferToS3 utility
     const s3Url = await uploadBufferToS3(imageBuffer, filename);
     console.log("S3 URL:", s3Url);

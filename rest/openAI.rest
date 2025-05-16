@@ -23,7 +23,7 @@ Content-Type: application/json
 }
 
 ### Create text for recipe from title
-POST {{localUrl}}/api/ai/fill-recipe
+POST {{baseUrl}}/api/ai/fill-recipe
 Authorization: Bearer 1234
 Content-Type: application/json
 
