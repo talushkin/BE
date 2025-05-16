@@ -33,8 +33,9 @@ app.get("/", (req, res) => {
     res.status(200).json({
         message: "Server is running",
         mongoUrl: sanitizedConnectionString,
-        recipeAPI: "/api/recipes"
-    });
+        recipeAPI: "/api/recipes",
+        TOKEN: process.env.TOKEN,
+        openAIAPI: process.env.OPENAI_API_URL    });
 });
 
 app.listen(PORT, () => {
