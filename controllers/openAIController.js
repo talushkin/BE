@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const axios = require("axios"); // Ensure you have axios installed
 const dotenv = require("dotenv");
-dotenv.config({ path: "../config/.env" });
+dotenv.config();
 
 const { uploadBufferToS3 } = require("../utils/uploadToS3");
 const Recipe = require("../models/Recipe"); // Make sure this path is correct
