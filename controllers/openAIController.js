@@ -119,7 +119,7 @@ Return the result as JSON with two keys: "ingredients" (an array of strings) and
 
     // Try to parse the response as JSON
     let recipeDetails;
-    console.log("AI Response:", aiText);
+   // console.log("AI Response:", aiText);
     try {
       recipeDetails = JSON.parse(aiText);
     } catch (parseError) {
@@ -141,9 +141,9 @@ Return the result as JSON with two keys: "ingredients" (an array of strings) and
     }
     
     return recipeDetails;
-    }
+    } else console.error("recipeId is not provided");
     // Update the recipe in the database using the Recipe model
-
+return recipeDetails;
   } catch (error) {
     console.error(error);
     throw new Error("Failed to fill recipe details"+JSON.stringify(aiText));
