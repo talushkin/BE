@@ -143,7 +143,7 @@ Return the result as JSON with two keys: "ingredients" (an array of strings) and
     }
     
     return updatedRecipe;
-    } else console.error("recipeId is not provided");
+    } 
     // Update the recipe in the database using the Recipe model
 return recipeDetails;
   } catch (error) {
