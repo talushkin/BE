@@ -1,55 +1,153 @@
-const express = require("express");
-const router = express.Router();
-const auth = require("../middlewares/auth");
-const { translateDirectly, createPictureFromText, fillRecipe } = require("../controllers/openAIController");
+//const fs = require("fs");
+const path = require("path");
+const axios = require("axios"); // Ensure you have axios installed
+const dotenv = require("dotenv");
+dotenv.config();
 
-// Route for text translation
-router.post("/translate", auth, async (req, res) => {
+const { uploadBufferToS3 } = require("../utils/uploadToS3");
+const Recipe = require("../models/Recipe"); // Make sure this path is correct
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_URL = process.env.OPENAI_API_URL;
+
+exports.translateDirectly = async (text, targetLanguage = "en") => {
   try {
-    const { text, targetLanguage } = req.body; // Read from the request body
-    if (!text) {
-      return res.status(400).json({ error: "Text is required", text, targetLanguage });
+    const prompt = `Translate the following text to ${targetLanguage}:\n"${text}"`;
+    const response = await axios.post(
+      `${OPENAI_API_URL}/chat/completions`,
+      {
+        model: "gpt-4",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+    let result = response.data.choices[0]?.message?.content?.trim() || text;
+    if (result.startsWith('"') && result.endsWith('"')) {
+      result = result.slice(1, -1);
     }
-    const translatedText = await translateDirectly(text, targetLanguage);
-    res.status(200).json({ text, targetLanguage, translatedText });
+    return result;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    throw new Error("Translation failed");
   }
-});
+};
 
-// Route for image generation
-router.post("/image", auth, async (req, res) => {
+exports.createPictureFromText = async (text) => {
   try {
-    const { text } = req.body; // Read from the request body
-    if (!text) {
-      return res.status(400).json({ error: "Text is required" });
+    const prompt = `Create a plated image of \n"${text}" on a wooden table`;
+    const response = await axios.post(
+      `${OPENAI_API_URL}/images/generations`,
+      {
+        prompt: prompt,
+        n: 1,
+        size: "256x256",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+    const imageUrl = response.data.data[0]?.url;
+    if (!imageUrl) {
+      throw new Error("Failed to generate image");
     }
-    const { imageUrl, savedPath } = await createPictureFromText(text);
-    res.status(200).json({ text, imageUrl, savedPath });
+    // Fetch the image data using axios
+    const imageResponse = await axios.get(imageUrl, { responseType: "arraybuffer" });
+    if (imageResponse.status !== 200) {
+      throw new Error("Failed to download the image");
+    }
+    const imageBuffer = Buffer.from(imageResponse.data);
+    // Save the image locally to the /images folder
+    // const imagesFolder = path.join(__dirname, "../images");
+    // if (!fs.existsSync(imagesFolder)) {
+    //   fs.mkdirSync(imagesFolder, { recursive: true });
+    // }
+    // Replace text spaces or special characters to "-" on filename
+    const sanitizedText = text.replace(/[^a-zA-Z0-9]/g, '-');
+    const filename = `${sanitizedText}-generated-image.png`;
+    // const imagePath = path.join(imagesFolder, filename);
+    // fs.writeFileSync(imagePath, imageBuffer);
+    // Upload the image buffer to S3 using the uploadBufferToS3 utility
+    const s3Url = await uploadBufferToS3(imageBuffer, filename);
+    console.log("S3 URL:", s3Url);
+    return { imageUrl: s3Url };
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    throw new Error("Image generation and saving failed");
   }
-});
+};
 
-// New Route for generating ingredients and preparation
-router.post("/fill-recipe", auth, async (req, res) => {
+// New function: fillRecipe
+// This function accepts an object containing recipeId and title,
+// generates ingredients and preparation steps using OpenAI,
+// and then updates the recipe document in the database.
+exports.fillRecipe = async ({ recipeId, title }) => {
+  if (!title) {
+    throw new Error("Title is required");
+  }
   try {
-    const { title, recipeId } = req.body; // for example, the recipe title
-    if (!title) {
-      return res.status(400).json({ error: "title is required" });
+    // Generate prompt for OpenAI to return JSON with "ingredients" and "preparation"
+    const prompt = `Given the recipe title "${title}", generate a list of ingredients and detailed preparation steps for a delicious recipe. 
+Return the result as JSON with two keys: "ingredients" (an array of strings) and "preparation" (a string).`;
+
+    const response = await axios.post(
+      `${OPENAI_API_URL}/chat/completions`,
+      {
+        model: "gpt-4",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    // Get the AI response text
+    const aiText = response.data.choices[0]?.message?.content;
+    if (!aiText) {
+      throw new Error("Failed to generate recipe details");
     }
-    // fillRecipe should generate ingredients and preparation using OpenAI
-    const recipeData = await fillRecipe({ recipeId, title });
-    if (!recipeData) {
-      return res.status(404).json({ error: "Recipe not created" , recipeData});
+
+    // Try to parse the response as JSON
+    let recipeDetails;
+    console.log("AI Response:", aiText);
+    try {
+      recipeDetails = JSON.parse(aiText);
+    } catch (parseError) {
+      throw new Error("Failed to parse OpenAI response as JSON"+JSON.stringify(parseError));
     }
-    res.status(200).json(recipeData);
+    if (recipeId) {
+      recipeDetails.recipeId = recipeId;
+          const updatedRecipe = await Recipe.findByIdAndUpdate(
+      recipeId,
+      {
+        ingredients: recipeDetails.ingredients,
+        preparation: recipeDetails.preparation,
+      },
+      { new: true }
+    );
+    
+    if (!updatedRecipe) {
+      throw new Error(`RecipeId ${recipeId} not found or update failed`);
+    }
+    
+    return updatedRecipe;
+    } else console.error("recipeId is not provided");
+    // Update the recipe in the database using the Recipe model
+return recipeDetails;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error"+JSON.stringify(error) });
+    throw new Error("Failed to fill recipe details");
   }
-});
-
-module.exports = router;
+};
