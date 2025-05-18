@@ -90,7 +90,9 @@ exports.createPictureFromText = async (text) => {
 // generates ingredients and preparation steps using OpenAI,
 // and then updates the recipe document in the database.
 exports.fillRecipe = async ({ recipeId, title }) => {
-  
+  if (!title) {
+    throw new Error("Title is required");
+  }
   try {
     // Generate prompt for OpenAI to return JSON with "ingredients" and "preparation"
     const prompt = `Given the recipe title "${title}", generate a list of ingredients and detailed preparation steps for a delicious recipe. 
