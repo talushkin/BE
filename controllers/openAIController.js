@@ -1,4 +1,4 @@
-const fs = require("fs");
+//const fs = require("fs");
 const path = require("path");
 const axios = require("axios"); // Ensure you have axios installed
 const dotenv = require("dotenv");
@@ -78,7 +78,7 @@ exports.createPictureFromText = async (text) => {
     // Upload the image buffer to S3 using the uploadBufferToS3 utility
     const s3Url = await uploadBufferToS3(imageBuffer, filename);
     console.log("S3 URL:", s3Url);
-    return { imageUrl: s3Url, savedPath: imagePath };
+    return { imageUrl: s3Url };
   } catch (error) {
     console.error(error);
     throw new Error("Image generation and saving failed");
@@ -119,7 +119,7 @@ Return the result as JSON with two keys: "ingredients" (an array of strings) and
 
     // Try to parse the response as JSON
     let recipeDetails;
-   // console.log("AI Response:", aiText);
+    console.log("AI Response:", aiText);
     try {
       recipeDetails = JSON.parse(aiText);
     } catch (parseError) {
