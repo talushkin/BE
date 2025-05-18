@@ -2,6 +2,7 @@
 require("dotenv").config();
 
 module.exports = function (req, res, next) {
+    console.log("Authorization middleware triggered",req.headers);
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ error: "Missing or invalid Authorization header" });

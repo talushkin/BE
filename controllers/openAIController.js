@@ -125,7 +125,7 @@ Return the result as JSON with two keys: "ingredients" (an array of strings) and
     try {
       recipeDetails = JSON.parse(aiText);
     } catch (parseError) {
-      throw new Error("Failed to parse OpenAI response as JSON");
+      throw new Error("Failed to parse OpenAI response as JSON"+JSON.stringify(parseError));
     }
     if (recipeId) {
       recipeDetails.recipeId = recipeId;
@@ -138,16 +138,16 @@ Return the result as JSON with two keys: "ingredients" (an array of strings) and
       { new: true }
     );
     
-    if (!recipeDetails) {
-      throw new Error("Recipe not found or update failed");
+    if (!updatedRecipe) {
+      throw new Error(`RecipeId ${recipeId} not found or update failed`);
     }
     
-    return recipeDetails;
-    } else console.error("recipeId is not provided");
+    return updatedRecipe;
+    }
     // Update the recipe in the database using the Recipe model
 return recipeDetails;
   } catch (error) {
     console.error(error);
-    throw new Error("Failed to fill recipe details"+JSON.stringify(aiText));
+    throw new Error("Failed to fill recipe details");
   }
 };

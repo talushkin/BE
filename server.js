@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+const swaggerUi = require("swagger-ui-express");
+const swagger = require("./docs/index.js");
 
 const categoryRoutes = require("./routes/categoriesRoutes");
 const recipeRoutes = require("./routes/recipesRoutes");
@@ -26,7 +28,25 @@ app.use("/api/recipes", recipeRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/ai", openAIRoutes);
 
-// Health-check endpoint with inner routes summary
+
+const swaggerUiOptions = {
+  swaggerOptions: {
+    authAction: {
+      bearerAuth: {
+        schema: {
+          type: "http",
+          in: "header",
+          name: "Authorization",
+          scheme: "bearer",
+          bearerFormat: "JWT"
+        },
+        value: "1234"
+      }
+    }
+  }
+};
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swagger, swaggerUiOptions));
 app.get("/", (req, res) => {
     // Remove credentials from the connection string (e.g. mongodb://user:pass@...)
     const sanitizedConnectionString = connectionString.replace(/\/\/.*?:.*?@/, "//");

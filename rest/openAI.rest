@@ -14,16 +14,16 @@ Content-Type: application/json
 ###
 
 ### Create picture from text
-POST {{localUrl}}/api/ai/image
+POST {{baseUrl}}/api/ai/image
 Authorization: Bearer 1234
 Content-Type: application/json
 
 {
-  "text": "margin for background lettuce leaves on the left"
+  "text": "flowers in a field"
 }
 
 ### Create text for recipe from title
-POST {{baseUrl}}/api/ai/fill-recipe
+POST {{localUrl}}/api/ai/fill-recipe
 Authorization: Bearer 1234
 Content-Type: application/json
 
