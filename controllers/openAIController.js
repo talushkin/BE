@@ -107,7 +107,7 @@ Return the result in en as JSON with two keys: "ingredients" (an array of string
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAThat's fine. I_API_KEY}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
         },
       }
     );
