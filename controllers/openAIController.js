@@ -88,15 +88,14 @@ exports.createPictureFromText = async (text) => {
 // New function: fillRecipe
 // This function accepts an object containing recipeId and title,
 // generates ingredients and preparation steps using OpenAI,
-// and then updates the recipe document in the database.
-exports.fillRecipe = async ({ recipeId, title }) => {
+exports.fillRecipe = async ({ recipeId, title, targetLanguage }) => {
   if (!title) {
     throw new Error("Title is required");
   }
   try {
     // Generate prompt for OpenAI to return JSON with "ingredients" and "preparation"
-    const prompt = `Given the recipe title "${title}", generate a list of ingredients and detailed preparation steps for a delicious recipe. 
-Return the result as JSON with two keys: "ingredients" (an array of strings) and "preparation" (a string).`;
+    const prompt = `Given the recipe title: (translate to en from ${targetLanguage}) "${title}", generate a list of ingredients and detailed preparation steps for a delicious recipe. 
+Return the result in en as JSON with two keys: "ingredients" (an array of strings) and "preparation" (a string).`;
 
     const response = await axios.post(
       `${OPENAI_API_URL}/chat/completions`,
@@ -108,7 +107,7 @@ Return the result as JSON with two keys: "ingredients" (an array of strings) and
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${OPENAThat's fine. I_API_KEY}`,
         },
       }
     );
