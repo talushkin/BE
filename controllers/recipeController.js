@@ -1,3 +1,4 @@
+const { NoSuchBucket } = require("@aws-sdk/client-s3");
 const Recipe = require("../models/Recipe");
 
 exports.getAllRecipes = async (req, res) => {
@@ -6,11 +7,11 @@ exports.getAllRecipes = async (req, res) => {
 };
 
 exports.createRecipe = async (req, res) => {
-    console.log("req.body", req.body);
+   // console.log("req.body", req.body);
     try {
         const recipe = new Recipe(req.body);
         await recipe.save();
-        res.status(201).json(recipe);
+        res.status(201).json({recipe, message: "Recipe created successfully", success: true});
     } catch (err) {
         if (err.name === "ValidationError") {
             const errors = Object.entries(err.errors).map(([field, error]) => ({
@@ -34,7 +35,7 @@ exports.updateRecipe = async (req, res) => {
             new: true,
             runValidators: true
         });
-        res.json(recipe);
+        res.json({recipe, message: "Recipe updated successfully", success: true});  
     } catch (err) {
         if (err.name === "ValidationError") {
             const errors = Object.entries(err.errors).map(([field, error]) => ({

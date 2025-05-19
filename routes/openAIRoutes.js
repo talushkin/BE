@@ -36,12 +36,12 @@ router.post("/image", auth, async (req, res) => {
 // New Route for generating ingredients and preparation
 router.post("/fill-recipe", auth, async (req, res) => {
   try {
-    const { title, recipeId } = req.body; // for example, the recipe title
-    if (!title) {
-      return res.status(400).json({ error: "title is required" });
-    }
+    const { title, recipeId, targetLanguage, categoryName } = req.body; // for example, the recipe title
+    // if (!title) {
+    //   return res.status(400).json({ error: "title is required" });
+    // }
     // fillRecipe should generate ingredients and preparation using OpenAI
-    const recipeData = await fillRecipe({ recipeId, title });
+    const recipeData = await fillRecipe({ recipeId, title,categoryName, targetLanguage });
     if (!recipeData) {
       return res.status(404).json({ error: "Recipe not created" , recipeData});
     }

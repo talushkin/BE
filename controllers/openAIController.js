@@ -6,6 +6,7 @@ dotenv.config();
 
 const { uploadBufferToS3 } = require("../utils/uploadToS3");
 const Recipe = require("../models/Recipe"); // Make sure this path is correct
+const Category = require("../models/Category");
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = process.env.OPENAI_API_URL;
@@ -88,14 +89,14 @@ exports.createPictureFromText = async (text) => {
 // New function: fillRecipe
 // This function accepts an object containing recipeId and title,
 // generates ingredients and preparation steps using OpenAI,
-exports.fillRecipe = async ({ recipeId, title, targetLanguage }) => {
-  if (!title) {
-    throw new Error("Title is required");
-  }
+exports.fillRecipe = async ({ recipeId, title, categoryName, targetLanguage }) => {
+
   try {
     // Generate prompt for OpenAI to return JSON with "ingredients" and "preparation"
-    const prompt = `Given the recipe title: (translate to en from ${targetLanguage}) "${title}", generate a list of ingredients and detailed preparation steps for a delicious recipe. 
-Return the result in en as JSON with two keys: "ingredients" (an array of strings) and "preparation" (a string).`;
+    const prompt = title?`Given the recipe title: (translate to en from ${targetLanguage}) "${title}", generate a list of ingredients and detailed preparation steps for a delicious recipe. 
+Return the result in en as JSON with two keys: "ingredients" (an array of strings) and "preparation" (a string).`
+: `create recipe with title for category: (translate to en from ${targetLanguage}) "${categoryName}", generate title, and a list of ingredients and detailed preparation steps for a delicious recipe. 
+Return the result in en as JSON with two keys: "title" (a string) "ingredients" (an array of strings) and "preparation" (a string).`;
 
     const response = await axios.post(
       `${OPENAI_API_URL}/chat/completions`,
