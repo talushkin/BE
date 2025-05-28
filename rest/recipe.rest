@@ -1,33 +1,51 @@
+@baseUrl = http://localhost:5000
 ### Get all recipes
-GET http://localhost:3000/api/recipes
+GET {{baseUrl}}/api/recipes
 Authorization: Bearer 1234
 
 ###
 
 ### Create recipe
-POST http://localhost:3000/api/recipes
+POST {{baseUrl}}/api/recipes
 Content-Type: application/json
 Authorization: Bearer 1234
 
 {
-  "title": "Pasta",
-  "ingredients": ["noodles", "tomato sauce"],
-  "categoryId": "682073d369d00d85e56b06d5"
+    "title": "Italian salad with tomato",
+    "ingredients": [
+        "tomato",
+        "lettuce",
+        "cucumber"
+    ],
+    "preparation": "Chop the vegetables and mix them in a bowl. Add olive oil and vinegar for dressing.",
+    "categoryId": "68205bf5f94da516687c5920",
+    "categoryName": "Salads",
+    "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-vLDbTnoXHQHu7bgkVTWTfr2P/user-sOg65zcEkTmU6XRdI0JWQXHx/img-9TvuEO8rmMyFUHxq3Dg2xlKC.png?st=2025-05-13T11%3A21%3A13Z&se=2025-05-13T13%3A21%3A13Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=cc612491-d948-4d2e-9821-2683df3719f5&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-05-12T23%3A24%3A10Z&ske=2025-05-13T23%3A24%3A10Z&sks=b&skv=2024-08-04&sig=wALLh1MxrFnzaXL8Sej1WD15Kzh5rqjmXqaoF%2BtXl4U%3D"
 }
 
 ###
 
 ### Update recipe
-PUT http://localhost:3000/api/recipes/68205cfff94da516687c5924
+PUT {{baseUrl}}/api/recipes/68205cfff94da516687c5924
 Content-Type: application/json
 Authorization: Bearer 1234
 
 {
-  "title": "Updated Pasta"
+  "title": "Updated Italian Pizza Margarita",
+  "ingredients": [
+    "tomato sauce",
+    "mozzarella cheese",
+    "fresh basil",
+    "olive oil"
+  ],
+  "preparation": "Spread sauce over the dough, add cheese and basil, then bake at 425°F for 12-15 minutes until the crust is golden.",
+  "categoryId": "68205bf5f94da516687c5920",
+  "categoryName": "Salads",
+  "imageUrl": "https://example.com/new-pizza-image.png"
 }
 
 ###
 
 ### Delete recipe
-DELETE http://localhost:3000/recipes/68205cfff94da516687c5923
+DELETE {{baseUrl}}/api/recipes/68205cfff94da516687c5923
 Authorization: Bearer 1234

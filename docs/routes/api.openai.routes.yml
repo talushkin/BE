@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: Recipe App API
+  version: 1.0.0
+  description: API documentation for Recipe App including Category, Recipe, and OpenAI endpoints.
+
+paths:
+  /api/ai/translate:
+    post:
+      summary: Get translation for text
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  example: "Hello, how are you?"
+                targetLanguage:
+                  type: string
+                  example: "es"
+      responses:
+        '200':
+          description: Translation successful
+  /api/ai/image:
+    post:
+      summary: Create picture from text
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  example: "flowers in a field"
+      responses:
+        '200':
+          description: Image created
+  /api/ai/fill-recipe:
+    post:
+      summary: Create text for recipe from title
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recipeId:
+                  type: string
+                  example: "6824b89071230ea2707f2280"
+                title:
+                  type: string
+                  example: "italian pizza margarita"
+      responses:
+        '200':
+          description: Recipe filled
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
