@@ -29,7 +29,7 @@ router.post("/image", auth, async (req, res) => {
     res.status(200).json({ text, imageUrl, savedPath });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
   }
 });
 
@@ -37,9 +37,6 @@ router.post("/image", auth, async (req, res) => {
 router.post("/fill-recipe", auth, async (req, res) => {
   try {
     const { title, recipeId, targetLanguage, categoryName } = req.body; // for example, the recipe title
-    // if (!title) {
-    //   return res.status(400).json({ error: "title is required" });
-    // }
     // fillRecipe should generate ingredients and preparation using OpenAI
     const recipeData = await fillRecipe({ recipeId, title,categoryName, targetLanguage });
     if (!recipeData) {
@@ -48,7 +45,7 @@ router.post("/fill-recipe", auth, async (req, res) => {
     res.status(200).json(recipeData);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
   }
 });
 
