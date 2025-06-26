@@ -10,14 +10,15 @@ const Category = require("../models/Category");
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = process.env.OPENAI_API_URL;
-
+console.log("OPENAI_API_KEY", OPENAI_API_KEY);
 exports.translateDirectly = async (text, targetLanguage = "en") => {
   try {
     const prompt = `Translate the following text to ${targetLanguage}:\n"${text}"`;
     const response = await axios.post(
       `${OPENAI_API_URL}/chat/completions`,
       {
-        model: "gpt-4",
+        model: "gpt-4o-mini",
+        store: true,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
       },
@@ -41,13 +42,14 @@ exports.translateDirectly = async (text, targetLanguage = "en") => {
 
 exports.createPictureFromText = async (text) => {
   try {
-    const prompt = `Create a plated image of \n"${text}" on a wooden table`;
+    const prompt = `Create a plated image of "${text}" on a wooden table`;
     const response = await axios.post(
       `${OPENAI_API_URL}/images/generations`,
       {
+        model: "dall-e-3",
         prompt: prompt,
         n: 1,
-        size: "256x256",
+        size: "1024x1024", // changed from 256x256 to supported value
       },
       {
         headers: {
@@ -58,6 +60,7 @@ exports.createPictureFromText = async (text) => {
     );
     const imageUrl = response.data.data[0]?.url;
     if (!imageUrl) {
+      console.error("OpenAI image response:", response.data);
       throw new Error("Failed to generate image");
     }
     // Fetch the image data using axios
@@ -66,22 +69,15 @@ exports.createPictureFromText = async (text) => {
       throw new Error("Failed to download the image");
     }
     const imageBuffer = Buffer.from(imageResponse.data);
-    // Save the image locally to the /images folder
-    // const imagesFolder = path.join(__dirname, "../images");
-    // if (!fs.existsSync(imagesFolder)) {
-    //   fs.mkdirSync(imagesFolder, { recursive: true });
-    // }
     // Replace text spaces or special characters to "-" on filename
     const sanitizedText = text.replace(/[^a-zA-Z0-9]/g, '-');
     const filename = `${sanitizedText}-generated-image.png`;
-    // const imagePath = path.join(imagesFolder, filename);
-    // fs.writeFileSync(imagePath, imageBuffer);
     // Upload the image buffer to S3 using the uploadBufferToS3 utility
     const s3Url = await uploadBufferToS3(imageBuffer, filename);
     console.log("S3 URL:", s3Url);
     return { imageUrl: s3Url };
   } catch (error) {
-    console.error(error);
+    console.error("Image generation error:", error?.response?.data || error.message || error);
     throw new Error("Image generation and saving failed");
   }
 };
@@ -90,18 +86,16 @@ exports.createPictureFromText = async (text) => {
 // This function accepts an object containing recipeId and title,
 // generates ingredients and preparation steps using OpenAI,
 exports.fillRecipe = async ({ recipeId, title, categoryName, targetLanguage }) => {
-
   try {
     // Generate prompt for OpenAI to return JSON with "ingredients" and "preparation"
-    const prompt = title?`Given the recipe title: (translate to en from ${targetLanguage}) "${title}", generate a list of ingredients and detailed preparation steps for a delicious recipe. 
-Return the result in en as JSON with two keys: "ingredients" (an array of strings) and "preparation" (a string).`
-: `create recipe with title for category: (translate to en from ${targetLanguage}) "${categoryName}", generate title, and a list of ingredients and detailed preparation steps for a delicious recipe. 
-Return the result in en as JSON with two keys: "title" (a string) "ingredients" (an array of strings) and "preparation" (a string).`;
+    const prompt = title ? `Given the recipe title: (translate to en from ${targetLanguage}) "${title}", generate a list of ingredients and detailed preparation steps for a delicious recipe. \nReturn the result in en as JSON with two keys: "ingredients" (an array of strings) and "preparation" (a string).`
+      : `create recipe with title for category: (translate to en from ${targetLanguage}) "${categoryName}", generate title, and a list of ingredients and detailed preparation steps for a delicious recipe. \nReturn the result in en as JSON with two keys: "title" (a string) "ingredients" (an array of strings) and "preparation" (a string).`;
 
     const response = await axios.post(
       `${OPENAI_API_URL}/chat/completions`,
       {
-        model: "gpt-4",
+        model: "gpt-4o-mini",
+        store: true,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
       },
@@ -121,31 +115,36 @@ Return the result in en as JSON with two keys: "title" (a string) "ingredients" 
 
     // Try to parse the response as JSON
     let recipeDetails;
-    console.log("AI Response:", aiText);
+    // If the response is not a valid JSON, it will throw an error
     try {
-      recipeDetails = JSON.parse(aiText);
+      const jsonMatch = aiText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("No JSON object found in AI response");
+      }
+      recipeDetails = JSON.parse(jsonMatch[0]);
     } catch (parseError) {
-      throw new Error("Failed to parse OpenAI response as JSON"+JSON.stringify(parseError));
+      throw new Error("Failed to parse OpenAI response as JSON: " + parseError.message);
     }
+
     if (recipeId) {
       recipeDetails.recipeId = recipeId;
-          const updatedRecipe = await Recipe.findByIdAndUpdate(
-      recipeId,
-      {
-        ingredients: recipeDetails.ingredients,
-        preparation: recipeDetails.preparation,
-      },
-      { new: true }
-    );
-    
-    if (!updatedRecipe) {
-      throw new Error(`RecipeId ${recipeId} not found or update failed`);
+      const updatedRecipe = await Recipe.findByIdAndUpdate(
+        recipeId,
+        {
+          ingredients: recipeDetails.ingredients,
+          preparation: recipeDetails.preparation,
+        },
+        { new: true }
+      );
+
+      if (!updatedRecipe) {
+        throw new Error(`RecipeId ${recipeId} not found or update failed`);
+      }
+
+      return updatedRecipe;
     }
-    
-    return updatedRecipe;
-    }
-    // Update the recipe in the database using the Recipe model
-return recipeDetails;
+    // If no recipeId, just return the filled recipe
+    return recipeDetails;
   } catch (error) {
     console.error(error);
     throw new Error("Failed to fill recipe details");
