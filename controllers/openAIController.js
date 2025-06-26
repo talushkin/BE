@@ -13,7 +13,7 @@ const OPENAI_API_URL = process.env.OPENAI_API_URL;
 console.log("OPENAI_API_KEY", OPENAI_API_KEY);
 exports.translateDirectly = async (text, targetLanguage = "en") => {
   try {
-    const prompt = `Translate the following text to ${targetLanguage}:\n"${text}"`;
+    const prompt = `return only the Translation in the selected language, the following text to ${targetLanguage}:\n"${text}"`;
     const response = await axios.post(
       `${OPENAI_API_URL}/chat/completions`,
       {
@@ -85,7 +85,7 @@ exports.createPictureFromText = async (text) => {
 // New function: fillRecipe
 // This function accepts an object containing recipeId and title,
 // generates ingredients and preparation steps using OpenAI,
-exports.fillRecipe = async ({ recipeId, title, categoryName, targetLanguage }) => {
+exports.fillRecipe = async ({ recipeId, title, categoryName='Salads', targetLanguage='en' }) => {
   try {
     // Generate prompt for OpenAI to return JSON with "ingredients" and "preparation"
     const prompt = title ? `Given the recipe title: (translate to en from ${targetLanguage}) "${title}", generate a list of ingredients and detailed preparation steps for a delicious recipe. \nReturn the result in en as JSON with two keys: "ingredients" (an array of strings) and "preparation" (a string).`
