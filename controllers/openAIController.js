@@ -13,7 +13,7 @@ const OPENAI_API_URL = process.env.OPENAI_API_URL;
 console.log("OPENAI_API_KEY", OPENAI_API_KEY);
 exports.translateDirectly = async (text, targetLanguage = "en") => {
   try {
-    const prompt = `return only the Translation in the selected language, the following text to ${targetLanguage}:\n"${text}"`;
+    const prompt = `translate the following text to ${targetLanguage}:"${text}" , return only the trimmed Translation in the selected language, do not return any other text or explanation.`;
     const response = await axios.post(
       `${OPENAI_API_URL}/chat/completions`,
       {

@@ -20,12 +20,19 @@ Authorization: Bearer 1234
 ###
 
 ### Update category
-PUT {{baseUrl}}/api/categories/68205bf5f94da516687c5921
+PUT {{baseUrl}}/api/categories/68205bf5f94da516687c5920
 Content-Type: application/json
 Authorization: Bearer 1234
 
 {
-  "name": "Updated Main Course"
+  "priority": 3,
+  "createdAt": "2025-05-02",
+  "category": "Salads",
+  "translatedCategory": [
+  { "lang": "en", "value": "Salads" },
+  { "lang": "he", "value": " נסיון סלטים" },
+  { "lang": "pt", "value": "Saladas" }
+]
 }
 
 ###
