@@ -2,7 +2,7 @@
 @baseUrl = https://be-tan-theta.vercel.app
 
 ### Get translation for text
-POST {{baseUrl}}/api/ai/translate
+POST {{localUrl}}/api/ai/translate
 Authorization: Bearer 1234
 Content-Type: application/json
 
@@ -14,7 +14,7 @@ Content-Type: application/json
 ###
 
 ### Create picture from text
-POST {{baseUrl}}/api/ai/image
+POST {{localUrl}}/api/ai/image
 Authorization: Bearer 1234
 Content-Type: application/json
 
