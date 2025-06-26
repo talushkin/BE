@@ -35,8 +35,8 @@ exports.translateDirectly = async (text, targetLanguage = "en") => {
     }
     return result;
   } catch (error) {
-    console.error(error);
-    throw new Error("Translation failed");
+    console.error("Translation error details:", error?.response?.data || error.message || error);
+    throw new Error("Translation failed: " + (error?.response?.data?.error?.message || error.message));
   }
 };
 

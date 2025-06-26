@@ -14,7 +14,7 @@ router.post("/translate", auth, async (req, res) => {
     res.status(200).json({ text, targetLanguage, translatedText });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
   }
 });
 
