@@ -1,3 +1,13 @@
+### Get lyrics and chords for a song
+POST {{localUrl}}/api/ai/get-song-lyrics-chords
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "title": "Radioactive",
+  "artist": "Imagine Dragons"
+}
+
 @localUrl = http://localhost:5000
 @baseUrl = https://be-tan-theta.vercel.app
 
@@ -31,4 +41,60 @@ Content-Type: application/json
   "recipeId": "6824b89071230ea2707f2280",
   "categoryName": "Pizzas",
   "targetLanguage": "en"
+}
+
+### Get song list by title
+POST {{localUrl}}/api/ai/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "title": "Radioactive"
+}
+
+### Get song list by artist
+POST {{localUrl}}/api/ai/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "artist": "Sia"
+}
+
+### Get song list by genre
+POST {{localUrl}}/api/ai/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "genre": "pop"
+}
+
+### Get song list by title and artist
+POST {{localUrl}}/api/ai/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "artist": "Shlomo Artzi"
+}
+
+### Get SRT lyrics for a song
+POST {{localUrl}}/api/ai/get-song-lyrics-srt
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "title": "Radioactive",
+  "artist": "Imagine Dragons"
+}
+
+### Get chords for a song
+POST {{localUrl}}/api/ai/get-song-lyrics-chords
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "title": "Let It Be",
+  "artist": "The Beatles"
 }

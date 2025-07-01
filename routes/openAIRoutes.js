@@ -1,7 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { translateDirectly, createPictureFromText, fillRecipe } = require("../controllers/openAIController");
+const { translateDirectly, createPictureFromText, fillRecipe, getSongListFromOpenAI, getSongListFromYouTube, getSongLyricsSRT, getSongLyricsChords } = require("../controllers/openAIController");
+// Route for fetching lyrics and chords for a song (OpenAI fallback)
+router.post("/get-song-lyrics-chords", auth, async (req, res) => {
+  try {
+    const { title, artist } = req.body;
+    if (!title || !artist) {
+      return res.status(400).json({ error: "Both title and artist are required" });
+    }
+    const lyricsChords = await getSongLyricsChords({ title, artist });
+    res.status(200).json({ title, artist, lyricsChords });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
+  }
+});
 
 // Route for text translation
 router.post("/translate", auth, async (req, res) => {
@@ -43,6 +57,38 @@ router.post("/fill-recipe", auth, async (req, res) => {
       return res.status(404).json({ error: "Recipe not created" , recipeData});
     }
     res.status(200).json(recipeData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
+  }
+});
+
+// Route for getting a song list by title, artist, or genre
+router.post("/get-song-list", auth, async (req, res) => {
+  try {
+    const { title, artist, genre, source='youtube' } = req.body;
+    let songs;
+    if (source === 'youtube') {
+      songs = await getSongListFromYouTube({ title, artist, genre });
+    } else {
+      songs = await getSongListFromOpenAI({ title, artist, genre });
+    }
+    res.status(200).json(songs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
+  }
+});
+
+// Route for fetching SRT lyrics for a song
+router.post("/get-song-lyrics-srt", auth, async (req, res) => {
+  try {
+    const { title, artist } = req.body;
+    if (!title || !artist) {
+      return res.status(400).json({ error: "Both title and artist are required" });
+    }
+    const srt = await getSongLyricsSRT({ title, artist });
+    res.status(200).json({ title, artist, srt });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });

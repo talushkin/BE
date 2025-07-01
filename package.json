@@ -20,6 +20,7 @@
     "swagger": "^0.7.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "ultimate-guitar": "^2.0.3",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
