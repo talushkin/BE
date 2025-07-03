@@ -85,8 +85,8 @@ Authorization: Bearer 1234
 Content-Type: application/json
 
 {
-  "title": "Radioactive",
-  "artist": "Imagine Dragons"
+  "title": "drao",
+  "artist": "gilberto gil"
 }
 
 ### Get chords for a song

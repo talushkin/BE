@@ -1,3 +1,5 @@
+
+
 @localUrl = http://localhost:5000
 @baseUrl = https://be-tan-theta.vercel.app
 
@@ -30,4 +32,41 @@ Content-Type: application/json
 {
   "recipeId": "6824b89071230ea2707f2280",
   "title": "italian pizza margarita"
+}
+
+### Get song list by title
+POST {{baseUrl}}/api/ai/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "title": "Radioactive"
+}
+
+### Get song list by artist
+POST {{baseUrl}}/api/ai/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "artist": "Sia"
+}
+
+### Get song list by genre
+POST {{baseUrl}}/api/ai/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "genre": "pop"
+}
+
+### Get song list by title and artist
+POST {{baseUrl}}/api/ai/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "title": "Radioactive",
+  "artist": "Imagine Dragons"
 }

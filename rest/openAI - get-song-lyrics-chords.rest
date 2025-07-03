@@ -1,8 +1,9 @@
 ### Get Lyrics and Chords from Ultimate Guitar
 
 # Get lyrics and chords for a song by title and artist
-POST http://localhost:3000/api/ai/get-song-lyrics-chords
+POST http://localhost:5000/api/ai/get-song-lyrics-chords
 Content-Type: application/json
+Authorization: Bearer 1234
 
 {
   "title": "Let It Be",

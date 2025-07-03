@@ -230,6 +230,7 @@ console.log("OpenAI song list response:", songList);
 
 // Get a song list from YouTube API based on title, artist, or genre
 exports.getSongListFromYouTube = async ({ title, artist, genre }) => {
+  console.log("Fetching song list from YouTube with params:", { title, artist, genre });
   try {
     if (!YOUTUBE_API_KEY) throw new Error('Missing YOUTUBE_API_KEY in .env');
     let q = '';
@@ -237,7 +238,7 @@ exports.getSongListFromYouTube = async ({ title, artist, genre }) => {
     if (artist) q += artist + ' ';
     if (genre) q += genre + ' ';
     q = q.trim() || 'popular music';
-    const maxResults = 10;
+    const maxResults = 20;
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=${maxResults}&q=${encodeURIComponent(q)}&key=${YOUTUBE_API_KEY}`;
     const ytRes = await axios.get(url);
     const items = ytRes.data.items || [];
@@ -247,6 +248,7 @@ exports.getSongListFromYouTube = async ({ title, artist, genre }) => {
     if (videoIds) {
       const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${videoIds}&key=${YOUTUBE_API_KEY}`;
       const detailsRes = await axios.get(detailsUrl);
+      console.log("YouTube video details response:", detailsRes.data);
       (detailsRes.data.items || []).forEach(item => {
         durations[item.id] = item.contentDetails.duration;
       });
@@ -254,11 +256,17 @@ exports.getSongListFromYouTube = async ({ title, artist, genre }) => {
     // Helper to convert ISO 8601 duration to mm:ss
     function isoToDuration(iso) {
       if (!iso) return '';
-      const match = iso.match(/PT(?:(\d+)M)?(?:(\d+)S)?/);
+      // Support hours, minutes, seconds (e.g. PT1H2M3S)
+      const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
       if (!match) return '';
-      const min = match[1] ? parseInt(match[1]) : 0;
-      const sec = match[2] ? parseInt(match[2]) : 0;
-      return `${min}:${sec.toString().padStart(2, '0')}`;
+      const hr = match[1] ? parseInt(match[1]) : 0;
+      const min = match[2] ? parseInt(match[2]) : 0;
+      const sec = match[3] ? parseInt(match[3]) : 0;
+      if (hr > 0) {
+        return `${hr}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+      } else {
+        return `${min}:${sec.toString().padStart(2, '0')}`;
+      }
     }
     const now = new Date();
     const createdAt = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth()+1).padStart(2, '0')}-${now.getFullYear()}`;
@@ -273,35 +281,59 @@ exports.getSongListFromYouTube = async ({ title, artist, genre }) => {
     }));
     return songs;
   } catch (error) {
-    console.error('Error fetching song list from YouTube:', error?.response?.data || error.message || error);
-    throw new Error('Failed to fetch song list from YouTube');
+    const errorString = typeof error === 'object' ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : String(error);
+    console.error('Error fetching song list from YouTube:', errorString);
+    throw new Error('Failed to fetch song list from YouTube: ' + errorString);
   }
 };
 
-// Fetch lyrics as SRT subtitles for a song by name and artist
+// Fetch lyrics and chords for a song by scraping CifraClub (cheerio/axios)
+// Requires: npm install axios cheerio
+const cheerio = require('cheerio');
 exports.getSongLyricsSRT = async ({ title, artist }) => {
+  function buildUrl(artist, song) {
+    const artistSlug = artist.toLowerCase().replace(/\s+/g, '-');
+    const songSlug = song.toLowerCase().replace(/\s+/g, '-');
+    return `https://www.cifraclub.com.br/${artistSlug}/${songSlug}/letra`;
+  }
   try {
-    const prompt = `For the song '${title}' by '${artist}', return the full lyrics as SRT subtitles. Each subtitle should have a time range (start --> end) in SRT format (hh:mm:ss,ms --> hh:mm:ss,ms) and the corresponding lyric line. Only return the SRT content, no explanation, no markdown, no extra text.`;
-    const response = await axios.post(
-      `${OPENAI_API_URL}/chat/completions`,
-      {
-        model: "gpt-4o-mini",
-        store: true,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.2,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
+    if (!title || !artist) throw new Error('Both title and artist are required');
+    const url = buildUrl(artist, title);
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+    // Try .letra-l first, then fallback to .letra
+    let lyrics = '';
+    let letraDiv = $('.letra-l');
+    if (letraDiv.length) {
+      // Each <p> is a paragraph, each <span class="l_row"><span>...</span></span> is a line
+      letraDiv.find('p').each((i, p) => {
+        const lines = [];
+        $(p).find("span.l_row").each((j, row) => {
+          const line = $(row).text().trim();
+          if (line) lines.push(line);
+        });
+        if (lines.length) {
+          lyrics += lines.join("\n") + "\n";
+        }
+      });
+    }
+    if (!lyrics) {
+      // Fallback: extract from .letra (each <p> is a paragraph)
+      letraDiv = $('.letra');
+      if (letraDiv.length) {
+        letraDiv.find('p').each((i, p) => {
+          const paragraph = $(p).text().replace(/\s*<br\s*\/?>/gi, '\n').trim();
+          if (paragraph) lyrics += paragraph + "\n";
+        });
       }
-    );
-    const srt = response.data.choices[0]?.message?.content?.trim();
-    if (!srt) throw new Error("No SRT lyrics returned");
-    return srt;
+    }
+    lyrics = lyrics.trim();
+    if (!lyrics) {
+      throw new Error('Lyrics not found. The structure may have changed.');
+    }
+    return lyrics;
   } catch (error) {
-    console.error("Error fetching SRT lyrics from OpenAI:", error?.response?.data || error.message || error);
-    throw new Error("Failed to fetch SRT lyrics");
+    console.error('Error fetching from CifraClub:', error.message || error);
+    throw new Error('Lyrics not found or error occurred.');
   }
 };
