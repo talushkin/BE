@@ -76,6 +76,32 @@ recipes backend server on port 3333 for vercel
 
 ## 2. SPOTIT Music Endpoints
 
+### Get Playlist List from YouTube
+**POST** `/api/ai/get-playlist-list`
+```json
+{
+  "q": "rock classics"
+}
+```
+**Response:**
+```json
+[
+  {
+    "id": "PL1234567890abcdef",
+    "title": "Rock Classics Playlist",
+    "description": "Best rock songs of all time.",
+    "image": "https://i.ytimg.com/vi/xyz123/hqdefault.jpg",
+    "channelTitle": "Music Channel",
+    "url": "https://www.youtube.com/playlist?list=PL1234567890abcdef",
+    "createdAt": "09-06-2024"
+  },
+  ...
+]
+```
+**Errors:**
+- `400` if `q` is missing
+- `500` for internal errors
+
 ### Get Song List (YouTube/OpenAI)
 **POST** `/api/ai/get-song-list`
 By title:

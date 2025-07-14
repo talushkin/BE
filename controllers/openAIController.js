@@ -40,7 +40,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = process.env.OPENAI_API_URL;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const YOUTUBE_BASE_URL = process.env.YOUTUBE_BASE_URL || 'https://www.youtube.com/watch?v=';
-console.log("OPENAI_API_KEY", OPENAI_API_KEY);
+//console.log("OPENAI_API_KEY", OPENAI_API_KEY);
 exports.translateDirectly = async (text, targetLanguage = "en") => {
   try {
     const prompt = `translate the following text to ${targetLanguage}:"${text}" , return only the trimmed Translation in the selected language, do not return any other text or explanation.`;
@@ -248,7 +248,6 @@ exports.getSongListFromYouTube = async ({ title, artist, genre }) => {
     if (videoIds) {
       const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${videoIds}&key=${YOUTUBE_API_KEY}`;
       const detailsRes = await axios.get(detailsUrl);
-      console.log("YouTube video details response:", detailsRes.data);
       (detailsRes.data.items || []).forEach(item => {
         durations[item.id] = item.contentDetails.duration;
       });
@@ -256,7 +255,6 @@ exports.getSongListFromYouTube = async ({ title, artist, genre }) => {
     // Helper to convert ISO 8601 duration to mm:ss
     function isoToDuration(iso) {
       if (!iso) return '';
-      // Support hours, minutes, seconds (e.g. PT1H2M3S)
       const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
       if (!match) return '';
       const hr = match[1] ? parseInt(match[1]) : 0;
@@ -270,20 +268,81 @@ exports.getSongListFromYouTube = async ({ title, artist, genre }) => {
     }
     const now = new Date();
     const createdAt = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth()+1).padStart(2, '0')}-${now.getFullYear()}`;
-    const songs = items.map(item => ({
-      image: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
-      title: item.snippet.title,
-      artist: item.snippet.channelTitle,
-      url: `${YOUTUBE_BASE_URL}${item.id.videoId}`,
-      lyrics: '', // Not available from YouTube API
-      duration: isoToDuration(durations[item.id.videoId]),
-      createdAt
+    // Fetch first 10 words for each song (async)
+    const songs = await Promise.all(items.map(async item => {
+      const songTitle = item.snippet.title;
+      const songArtist = item.snippet.channelTitle;
+      let first10Words = '';
+      return {
+        image: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
+        title: songTitle,
+        artist: songArtist,
+        url: `${YOUTUBE_BASE_URL}${item.id.videoId}`,
+        lyrics: first10Words,
+        duration: isoToDuration(durations[item.id.videoId]),
+        createdAt
+      };
     }));
     return songs;
   } catch (error) {
     const errorString = typeof error === 'object' ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : String(error);
     console.error('Error fetching song list from YouTube:', errorString);
     throw new Error('Failed to fetch song list from YouTube: ' + errorString);
+  }
+};
+
+// Helper: Get first 10 words from lyrics
+async function getFirst10Words({ artist, title }) {
+  try {
+    // Try lyrics.ovh first
+    const res = await axios.get(`https://api.lyrics.ovh/v1/${artist}/${title}`);
+    console.log("Lyrics response:", res.data);
+    const lyrics = res.data.lyrics || '';
+    const words = lyrics.split(/\s+/).filter(Boolean);
+    return words.slice(0, 10).join(' ');
+  } catch (error) {
+    console.error('Error fetching lyrics for first 10 words:', error.message || error);
+    return '';
+  }
+}
+
+// Endpoint: /api/ai/get-song-10-words
+exports.getSong10Words = async ({ artist, title }) => {
+  try {
+    if (!artist || !title) throw new Error('Both artist and title are required');
+    const first10 = await getFirst10Words({ artist, title });
+    return { artist, title, first10Words: first10 };
+  } catch (error) {
+    console.error('Error in getSong10Words:', error.message || error);
+    throw new Error('Failed to get first 10 words: ' + (error.message || error));
+  }
+};
+
+// Get playlist list from YouTube API based on search query (q)
+exports.getPlaylistFromYouTube = async ({ q }) => {
+  console.log("Fetching playlists from YouTube with query:", q);
+  try {
+    if (!YOUTUBE_API_KEY) throw new Error('Missing YOUTUBE_API_KEY in .env');
+    const maxResults = 20;
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=playlist&maxResults=${maxResults}&q=${encodeURIComponent(q || 'music')}&key=${YOUTUBE_API_KEY}`;
+    const ytRes = await axios.get(searchUrl);
+    const items = ytRes.data.items || [];
+    const now = new Date();
+    const createdAt = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth()+1).padStart(2, '0')}-${now.getFullYear()}`;
+    const playlists = items.map(item => ({
+      id: item.id.playlistId,
+      title: item.snippet.title,
+      description: item.snippet.description,
+      image: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
+      channelTitle: item.snippet.channelTitle,
+      url: `https://www.youtube.com/playlist?list=${item.id.playlistId}`,
+      createdAt
+    }));
+    return playlists;
+  } catch (error) {
+    const errorString = typeof error === 'object' ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : String(error);
+    console.error('Error fetching playlists from YouTube:', errorString);
+    throw new Error('Failed to fetch playlists from YouTube: ' + errorString);
   }
 };
 

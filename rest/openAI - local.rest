@@ -98,3 +98,22 @@ Content-Type: application/json
   "title": "Let It Be",
   "artist": "The Beatles"
 }
+
+### Get playlist list from YouTube
+POST {{localUrl}}/api/ai/get-playlist-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "q": "rock classics"
+}
+
+### Get first 10 words of a song's lyrics
+POST {{localUrl}}/api/ai/get-song-10-words
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "artist": "Imagine Dragons",
+  "title": "Believer"
+}

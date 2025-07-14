@@ -1,0 +1,32 @@
+### Get Playlist List from YouTube
+
+Fetches playlists from YouTube based on a search query.
+
+**POST** `/api/ai/get-playlist-list`
+
+**Body:**
+```json
+{
+  "q": "rock classics"
+}
+```
+
+**Response:**
+```json
+[
+  {
+    "id": "PL1234567890abcdef",
+    "title": "Rock Classics Playlist",
+    "description": "Best rock songs of all time.",
+    "image": "https://i.ytimg.com/vi/xyz123/hqdefault.jpg",
+    "channelTitle": "Music Channel",
+    "url": "https://www.youtube.com/playlist?list=PL1234567890abcdef",
+    "createdAt": "09-06-2024"
+  },
+  ...
+]
+```
+
+**Errors:**
+- `400` if `q` is missing
+- `500` for internal errors

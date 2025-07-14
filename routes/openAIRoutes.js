@@ -1,7 +1,35 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { translateDirectly, createPictureFromText, fillRecipe, getSongListFromOpenAI, getSongListFromYouTube, getSongLyricsSRT, getSongLyricsChords } = require("../controllers/openAIController");
+const { translateDirectly, createPictureFromText, fillRecipe, getSongListFromOpenAI, getSongListFromYouTube, getSongLyricsSRT, getSongLyricsChords, getPlaylistFromYouTube, getSong10Words } = require("../controllers/openAIController");
+// Route for fetching first 10 words of a song's lyrics
+router.post("/get-song-10-words", auth, async (req, res) => {
+  try {
+    const { artist, title } = req.body;
+    if (!artist || !title) {
+      return res.status(400).json({ error: "Both artist and title are required" });
+    }
+    const result = await getSong10Words({ artist, title });
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
+  }
+});
+// Route for fetching playlists from YouTube by query
+router.post("/get-playlist-list", auth, async (req, res) => {
+  try {
+    const { q } = req.body;
+    if (!q) {
+      return res.status(400).json({ error: "Query (q) is required" });
+    }
+    const playlists = await getPlaylistFromYouTube({ q });
+    res.status(200).json(playlists);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
+  }
+});
 // Route for fetching lyrics and chords for a song (OpenAI fallback)
 router.post("/get-song-lyrics-chords", auth, async (req, res) => {
   try {
