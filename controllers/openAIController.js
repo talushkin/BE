@@ -22,8 +22,9 @@ exports.getSongLyricsChords = async ({ title, artist }) => {
     if (!lyricsChords) throw new Error("No lyrics/chords returned");
     return lyricsChords;
   } catch (error) {
-    console.error("Error fetching lyrics/chords from OpenAI:", error?.response?.data || error.message || error);
-    throw new Error("Failed to fetch lyrics/chords");
+    const errorDetails = error?.response?.data || error.message || error;
+    console.error("Error fetching lyrics/chords from OpenAI:", errorDetails);
+    throw { message: "Failed to fetch lyrics/chords", details: errorDetails };
   }
 };
 //const fs = require("fs");
@@ -65,8 +66,9 @@ exports.translateDirectly = async (text, targetLanguage = "en") => {
     }
     return result;
   } catch (error) {
-    console.error("Translation error details:", error?.response?.data || error.message || error);
-    throw new Error("Translation failed: " + (error?.response?.data?.error?.message || error.message));
+    const errorDetails = error?.response?.data || error.message || error;
+    console.error("Translation error details:", errorDetails);
+    throw { message: "Translation failed", details: errorDetails };
   }
 };
 
@@ -107,8 +109,9 @@ exports.createPictureFromText = async (text) => {
     console.log("S3 URL:", s3Url);
     return { imageUrl: s3Url };
   } catch (error) {
-    console.error("Image generation error:", error?.response?.data || error.message || error);
-    throw new Error("Image generation and saving failed");
+    const errorDetails = error?.response?.data || error.message || error;
+    console.error("Image generation error:", errorDetails);
+    throw { message: "Image generation and saving failed", details: errorDetails };
   }
 };
 
@@ -176,8 +179,9 @@ exports.fillRecipe = async ({ recipeId, title, categoryName='Salads', targetLang
     // If no recipeId, just return the filled recipe
     return recipeDetails;
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fill recipe details");
+    const errorDetails = error?.response?.data || error.message || error;
+    console.error("Fill recipe error:", errorDetails);
+    throw { message: "Failed to fill recipe details", details: errorDetails };
   }
 };
 
@@ -223,8 +227,9 @@ console.log("OpenAI song list response:", songList);
 
     return songs;
   } catch (error) {
-    console.error("Error fetching song list from OpenAI:", error);
-    throw new Error("Failed to fetch song list");
+    const errorDetails = error?.response?.data || error.message || error;
+    console.error("Error fetching song list from OpenAI:", errorDetails);
+    throw { message: "Failed to fetch song list", details: errorDetails };
   }
 };
 
@@ -329,14 +334,31 @@ exports.getPlaylistFromYouTube = async ({ q }) => {
     const items = ytRes.data.items || [];
     const now = new Date();
     const createdAt = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth()+1).padStart(2, '0')}-${now.getFullYear()}`;
-    const playlists = items.map(item => ({
-      id: item.id.playlistId,
-      title: item.snippet.title,
-      description: item.snippet.description,
-      image: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
-      channelTitle: item.snippet.channelTitle,
-      url: `https://www.youtube.com/playlist?list=${item.id.playlistId}`,
-      createdAt
+    // For each playlist, fetch its items (songs)
+    const playlists = await Promise.all(items.map(async item => {
+      const playlistId = item.id.playlistId;
+      let songs = [];
+      try {
+        // Get first 10 videos in the playlist
+        const playlistItemsUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`;
+        const playlistRes = await axios.get(playlistItemsUrl);
+        songs = (playlistRes.data.items || []).map(vid => ({
+          title: vid.snippet.title,
+          videoId: vid.snippet.resourceId.videoId
+        }));
+      } catch (err) {
+        songs = [];
+      }
+      return {
+        id: playlistId,
+        title: item.snippet.title,
+        description: item.snippet.description,
+        image: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
+        channelTitle: item.snippet.channelTitle,
+        url: `https://www.youtube.com/playlist?list=${playlistId}`,
+        createdAt,
+        songs
+      };
     }));
     return playlists;
   } catch (error) {
