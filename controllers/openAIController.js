@@ -1,3 +1,42 @@
+// Generate 10 React questions with 4 possible answers (1 correct), with explanations, in the requested format
+exports.getReactQuestion = async ({ numberOfQuestions = 10, numberOfPossibleAnswers = 4 } = {}) => {
+  try {
+    const prompt = `Generate an array of ${numberOfQuestions} general multiple-choice questions about React elements. Each question should be an object with:
+q: the question (string),
+answers: an array of ${numberOfPossibleAnswers} objects, each with { text: string, correct: boolean },
+explanation: a string explaining the correct answer.
+Return only a valid JSON array, do not include markdown, code blocks, or any extra text.`;
+    const response = await axios.post(
+      `${OPENAI_API_URL}/chat/completions`,
+      {
+        model: "gpt-4o-mini",
+        store: true,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.5,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+    const content = response.data.choices[0]?.message?.content;
+    if (!content) throw new Error("No questions returned");
+    let questions;
+    try {
+      questions = JSON.parse(content);
+    } catch (err) {
+      throw new Error("Failed to parse OpenAI response as JSON: " + err.message + "\nContent: " + content);
+    }
+    // Optionally validate/format the questions array here
+    return questions;
+  } catch (error) {
+    const errorDetails = error?.response?.data || error.message || error;
+    console.error("Error generating React questions:", errorDetails);
+    throw { message: "Failed to generate React questions", details: errorDetails };
+  }
+};
 // Get lyrics and chords for a song by title and artist using OpenAI (fallback if Ultimate Guitar scraping is not available)
 exports.getSongLyricsChords = async ({ title, artist }) => {
   try {

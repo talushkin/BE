@@ -1,7 +1,8 @@
+
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { translateDirectly, createPictureFromText, fillRecipe, getSongListFromOpenAI, getSongListFromYouTube, getSongLyricsSRT, getSongLyricsChords, getPlaylistFromYouTube, getSong10Words } = require("../controllers/openAIController");
+const { getReactQuestion, translateDirectly, createPictureFromText, fillRecipe, getSongListFromOpenAI, getSongListFromYouTube, getSongLyricsSRT, getSongLyricsChords, getPlaylistFromYouTube, getSong10Words } = require("../controllers/openAIController");
 // Route for fetching first 10 words of a song's lyrics
 router.post("/get-song-10-words", auth, async (req, res) => {
   try {
@@ -80,9 +81,9 @@ router.post("/fill-recipe", auth, async (req, res) => {
   try {
     const { title, recipeId, targetLanguage, categoryName } = req.body; // for example, the recipe title
     // fillRecipe should generate ingredients and preparation using OpenAI
-    const recipeData = await fillRecipe({ recipeId, title,categoryName, targetLanguage });
+    const recipeData = await fillRecipe({ recipeId, title, categoryName, targetLanguage });
     if (!recipeData) {
-      return res.status(404).json({ error: "Recipe not created" , recipeData});
+      return res.status(404).json({ error: "Recipe not created", recipeData });
     }
     res.status(200).json(recipeData);
   } catch (error) {
@@ -94,7 +95,7 @@ router.post("/fill-recipe", auth, async (req, res) => {
 // Route for getting a song list by title, artist, or genre
 router.post("/get-song-list", auth, async (req, res) => {
   try {
-    const { title, artist, genre, source='youtube' } = req.body;
+    const { title, artist, genre, source = 'youtube' } = req.body;
     let songs;
     if (source === 'youtube') {
       songs = await getSongListFromYouTube({ title, artist, genre });
@@ -120,6 +121,18 @@ router.post("/get-song-lyrics-srt", auth, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
+  }
+});
+
+// Route for generating React multiple-choice questions (customizable)
+router.post("/react-questionaire", auth, async (req, res) => {
+  try {
+    const { numberOfQuestions = 10, numberOfPossibleAnswers = 4 } = req.body || {};
+    const questions = await getReactQuestion({ numberOfQuestions, numberOfPossibleAnswers });
+    res.status(200).json(questions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error.details || error?.response?.data });
   }
 });
 

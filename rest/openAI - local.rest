@@ -117,3 +117,20 @@ Content-Type: application/json
   "artist": "Imagine Dragons",
   "title": "Believer"
 }
+
+### Get a React multiple-choice question
+POST {{localUrl}}/api/ai/react-questionaire
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{}
+
+### Get a custom number of React multiple-choice questions
+POST {{localUrl}}/api/ai/react-questionaire
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "numberOfQuestions": 1,
+  "numberOfPossibleAnswers": 4
+}
