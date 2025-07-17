@@ -1,7 +1,19 @@
 // Generate 10 React questions with 4 possible answers (1 correct), with explanations, in the requested format
 exports.getReactQuestion = async ({ numberOfQuestions = 10, numberOfPossibleAnswers = 4 } = {}) => {
   try {
-    const prompt = `Generate an array of ${numberOfQuestions} general multiple-choice questions about React elements. Each question should be an object with:
+    const prompt = `Generate an array of ${numberOfQuestions} multiple-choice questions focused on React, using the following topics and question styles as a guide. Each question should be clear, relevant, and similar in format and difficulty to these topics:
+
+Component Basics: correct syntax for functional components, exporting, return purpose, root elements, React.Fragment, JSX, children, null returns
+Props: passing, mutability, required/default values, prop types
+State Management: useState, mutability, async updates, initializing from props, setState in render
+Hooks: useEffect, useRef, useMemo, cleanup, side effects, one-time effects
+Component Composition: composition, passing components as props, controlled/uncontrolled, lifting state, splitting components
+React Architecture: container vs presentational, Context API, prop drilling, when to use/avoid Context
+Forms and Inputs: handling input, controlled/uncontrolled, validation, preventing default, accessing data
+Folder Structure: where to store components, hooks, Redux, index.js, splitting styles
+Advanced Concepts: code splitting, React.lazy, Suspense, SSR, hydration
+
+Each question should be an object with:
 q: the question (string),
 answers: an array of ${numberOfPossibleAnswers} objects, each with { text: string, correct: boolean },
 explanation: a string explaining the correct answer.
