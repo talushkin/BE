@@ -125,7 +125,7 @@ exports.translateDirectly = async (text, targetLanguage = "en") => {
 
 exports.createPictureFromText = async (text) => {
   try {
-    const prompt = `Create a plated image of "${text}" on a wooden table`;
+    const prompt = text;
     const response = await axios.post(
       `${OPENAI_API_URL}/images/generations`,
       {
