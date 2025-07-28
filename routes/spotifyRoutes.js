@@ -6,6 +6,7 @@ const {
   getSpotifyAccessToken,
   getSpotifyProfile,
   searchSpotify,
+  searchSpotifyWithStoredTokens,
   getStoredSpotifyTokens,
   handleSpotifyCallback
 } = require("../controllers/spotifyController");
@@ -71,6 +72,61 @@ router.post("/callback", auth, async (req, res) => {
   }
 });
 
+// GET route for Spotify callback - handles Spotify's redirect after authorization
+router.get("/callback", async (req, res) => {
+  try {
+    const { code, state, error, error_description } = req.query;
+    
+    console.log('Spotify GET callback received:', {
+      hasCode: !!code,
+      hasState: !!state,
+      hasError: !!error,
+      error_description
+    });
+    
+    // If there's an error from Spotify
+    if (error) {
+      console.error('Spotify authorization error:', error, error_description);
+      return res.status(400).json({
+        error: 'Spotify authorization failed',
+        spotify_error: error,
+        description: error_description
+      });
+    }
+    
+    if (!code) {
+      return res.status(400).json({ 
+        error: "Authorization code not received from Spotify"
+      });
+    }
+    
+    // For now, return the code and state so the frontend can use them
+    // In a real app, you'd want to complete the flow here or redirect to frontend
+    res.json({
+      success: true,
+      message: "Authorization successful! Use this code to complete authentication.",
+      code: code,
+      state: state,
+      next_step: {
+        method: "POST",
+        url: "/api/spotify/callback",
+        body: {
+          code: code,
+          state: state,
+          userId: "your_user_id_here"
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Spotify GET callback error:', error);
+    res.status(500).json({ 
+      error: "Callback processing failed", 
+      details: error.message 
+    });
+  }
+});
+
 // Route for Spotify token exchange (after callback)
 router.post("/token", auth, async (req, res) => {
   try {
@@ -121,8 +177,42 @@ router.post("/profile", auth, async (req, res) => {
   }
 });
 
-// Route for Spotify search
+// Route for Spotify search using stored tokens (recommended)
 router.post("/search", auth, async (req, res) => {
+  try {
+    const { q, type = 'track', limit = 20, userId } = req.body;
+    
+    console.log('Spotify search with stored tokens request:', {
+      hasQuery: !!q,
+      hasUserId: !!userId,
+      searchType: type,
+      limit
+    });
+    
+    if (!q) {
+      return res.status(400).json({ error: "Search query (q) is required" });
+    }
+    
+    if (!userId) {
+      return res.status(400).json({ 
+        error: "userId is required to retrieve stored tokens",
+        hint: "Include userId in the request body to use your saved Spotify tokens"
+      });
+    }
+    
+    const searchResults = await searchSpotifyWithStoredTokens({ q, type, limit, userId });
+    res.status(200).json(searchResults);
+  } catch (error) {
+    console.error('Spotify search route error:', error);
+    res.status(500).json({ 
+      error: error.message || "Spotify search failed", 
+      details: error.details || error?.response?.data 
+    });
+  }
+});
+
+// Route for Spotify search with manual access token (legacy)
+router.post("/search-manual", auth, async (req, res) => {
   try {
     const { q, type = 'track', limit = 20, accessToken } = req.body;
     if (!q || !accessToken) {

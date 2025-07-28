@@ -1,0 +1,52 @@
+@localUrl = http://localhost:5000
+@baseUrl = https://be-tan-theta.vercel.app
+
+### Get song list from YouTube by title, artist, or genre
+POST {{localUrl}}/api/youtube/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "title": "Imagine Dragons",
+  "artist": "",
+  "genre": "rock"
+}
+
+### Get playlist list from YouTube
+POST {{localUrl}}/api/youtube/get-playlist-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "q": "rock classics"
+}
+
+### Get songs from a specific YouTube playlist by ID (first 10 songs)
+POST {{localUrl}}/api/youtube/get-playlist-songs
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "playlistId": "PLrAd2F5wF_gLgGfKZrflhkhUqjVYN8_qI"
+}
+
+### Get songs from a specific YouTube playlist by ID with pagination
+POST {{localUrl}}/api/youtube/get-playlist-songs
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "playlistId": "PLrAd2F5wF_gLgGfKZrflhkhUqjVYN8_qI",
+  "skip": 10,
+  "limit": 20
+}
+
+### Get first 10 words of a song's lyrics
+POST {{localUrl}}/api/youtube/get-song-10-words
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "artist": "Imagine Dragons",
+  "title": "Believer"
+}

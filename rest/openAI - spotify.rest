@@ -14,8 +14,8 @@ Authorization: Bearer 1234
 Content-Type: application/json
 
 {
-  "code": "sd", 
-  "state": "your_state_here",
+  "code": "AQDDjGdO_hh-vu8uKd60CIWc7K1MiVImjs9KGXcX0X-sYDSbKXMbAmoViXY5zkXGZLZikOq3FkTH7B8hDcmztA4BYv0Dbvg4k2JHSv3Q98s_NI45bxObEPhVoWt9su5__cvCKVOfCuRk6eld6aA4BcsbU25aEar_srmTdwZof0kQ89OsrabjAX4oj105xyfXjQMvWzKFI9MZGBgojI-5r_5mzqf2GPvfUHAbylaUwYB8EkDtKJsGjvWwIigW4T4M01RVG5h-JHimLUibcVDeBav0N3R_0-XV-SnCg8BybHEA0sFZ6D1AjzKuqxvd1zTnbyEQByP3IE4n5k4KhNtnqbAktCAe-rjQOUbscokqFeQ", 
+  "state": "6f65660461d2e0f2937ec795b07a07e9",
   "userId": "user123"
 }
 
@@ -37,7 +37,7 @@ Content-Type: application/json
   "accessToken": "BQC..."
 }
 
-### Search Spotify for tracks
+### Search Spotify for tracks (using stored tokens - RECOMMENDED)
 POST {{localUrl}}/api/spotify/search
 Authorization: Bearer 1234
 Content-Type: application/json
@@ -46,10 +46,10 @@ Content-Type: application/json
   "q": "imagine dragons",
   "type": "track",
   "limit": 10,
-  "accessToken": "BQC..."
+  "userId": "6gtuei9kcft1q8r8m7yborc0i"
 }
 
-### Search Spotify for artists
+### Search Spotify for artists (using stored tokens)
 POST {{localUrl}}/api/spotify/search
 Authorization: Bearer 1234
 Content-Type: application/json
@@ -58,10 +58,10 @@ Content-Type: application/json
   "q": "coldplay",
   "type": "artist",
   "limit": 5,
-  "accessToken": "BQC..."
+  "userId": "6gtuei9kcft1q8r8m7yborc0i"
 }
 
-### Search Spotify for playlists
+### Search Spotify for playlists (using stored tokens)
 POST {{localUrl}}/api/spotify/search
 Authorization: Bearer 1234
 Content-Type: application/json
@@ -69,6 +69,18 @@ Content-Type: application/json
 {
   "q": "rock classics",
   "type": "playlist",
+  "limit": 10,
+  "userId": "6gtuei9kcft1q8r8m7yborc0i"
+}
+
+### Search Spotify with manual access token (LEGACY)
+POST {{localUrl}}/api/spotify/search-manual
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "q": "imagine dragons",
+  "type": "track",
   "limit": 10,
   "accessToken": "BQC..."
 }

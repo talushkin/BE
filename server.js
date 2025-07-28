@@ -9,6 +9,7 @@ const categoryRoutes = require("./routes/categoriesRoutes");
 const recipeRoutes = require("./routes/recipesRoutes");
 const openAIRoutes = require("./routes/openAIRoutes");
 const spotifyRoutes = require("./routes/spotifyRoutes");
+const youTubeRoutes = require("./routes/youTubeRoutes");
 const logger = require("./middlewares/logger"); // 👈 מוסיפים את ה-logger
 
 const app = express();
@@ -29,6 +30,7 @@ app.use("/api/recipes", recipeRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/ai", openAIRoutes);
 app.use("/api/spotify", spotifyRoutes);
+app.use("/api/youtube", youTubeRoutes);
 
 
 const swaggerUiOptions = {

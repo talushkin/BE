@@ -404,7 +404,76 @@ exports.getSpotifyProfile = async ({ accessToken }) => {
   }
 };
 
-// Search Spotify (tracks, artists, albums, playlists)
+// Search Spotify using stored tokens (tracks, artists, albums, playlists)
+exports.searchSpotifyWithStoredTokens = async ({ q, type = 'track', limit = 20, userId }) => {
+  try {
+    if (!userId) throw new Error('userId (spotifyUserId) is required to retrieve stored tokens');
+    if (!q) throw new Error('Search query (q) is required');
+    
+    console.log(`🔍 Searching Spotify for "${q}" (type: ${type}) using stored tokens for spotifyUserId: ${userId}`);
+    
+    // First, find the user by spotifyUserId in the users collection
+    const userDoc = await SpotifyUser.findOne({ spotifyUserId: userId });
+    if (!userDoc) {
+      throw new Error('No Spotify user found with this spotifyUserId. Please authenticate first.');
+    }
+    
+    console.log(`👤 Found user: ${userDoc.displayName} (${userDoc.email})`);
+    
+    // Then, find the tokens using the spotifyUserId
+    const tokenDoc = await SpotifyToken.findOne({ spotifyUserId: userId });
+    if (!tokenDoc) {
+      throw new Error('No Spotify tokens found for this user. Please authenticate first.');
+    }
+    
+    // Check if token is expired
+    const now = new Date();
+    if (now >= tokenDoc.expiresAt) {
+      throw new Error('Spotify token has expired. Please re-authenticate.');
+    }
+    
+    console.log(`✅ Found valid token for user ${userDoc.displayName}, expires at: ${tokenDoc.expiresAt}`);
+    
+    const params = new URLSearchParams({
+      q,
+      type, // track, artist, album, playlist
+      limit: limit.toString(),
+      market: userDoc.country || 'US' // Use user's country if available
+    });
+    
+    const response = await axios.get(`https://api.spotify.com/v1/search?${params.toString()}`, {
+      headers: { 
+        'Authorization': `Bearer ${tokenDoc.accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log(`🎵 Search completed successfully, found ${response.data.tracks?.total || response.data.artists?.total || response.data.albums?.total || response.data.playlists?.total || 0} results`);
+    
+    return {
+      success: true,
+      searchQuery: q,
+      searchType: type,
+      user: {
+        spotifyUserId: userDoc.spotifyUserId,
+        displayName: userDoc.displayName,
+        email: userDoc.email,
+        country: userDoc.country
+      },
+      tokenInfo: {
+        expiresAt: tokenDoc.expiresAt,
+        scope: tokenDoc.scope
+      },
+      results: response.data
+    };
+  } catch (error) {
+    const errorDetails = error?.response?.data || error.message || error;
+    console.error("Spotify search with stored tokens error:", errorDetails);
+    throw { message: "Failed to search Spotify with stored tokens", details: errorDetails };
+  }
+};
+
+// Search Spotify (tracks, artists, albums, playlists) - original function with manual token
 exports.searchSpotify = async ({ q, type = 'track', limit = 20, accessToken }) => {
   try {
     if (!accessToken) throw new Error('Access token is required');

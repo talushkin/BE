@@ -43,7 +43,7 @@ Content-Type: application/json
   "targetLanguage": "en"
 }
 
-### Get song list by title
+### Get song list by title (OpenAI only)
 POST {{localUrl}}/api/ai/get-song-list
 Authorization: Bearer 1234
 Content-Type: application/json
@@ -52,7 +52,16 @@ Content-Type: application/json
   "title": "Radioactive"
 }
 
-### Get song list by artist
+### Get song list from YouTube by title
+POST {{localUrl}}/api/ai/get-youtube-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "title": "Radioactive"
+}
+
+### Get song list by artist (OpenAI only)
 POST {{localUrl}}/api/ai/get-song-list
 Authorization: Bearer 1234
 Content-Type: application/json
@@ -61,8 +70,26 @@ Content-Type: application/json
   "artist": "Sia"
 }
 
-### Get song list by genre
+### Get song list from YouTube by artist
+POST {{localUrl}}/api/ai/get-youtube-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "artist": "Sia"
+}
+
+### Get song list by genre (OpenAI only)
 POST {{localUrl}}/api/ai/get-song-list
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "genre": "pop"
+}
+
+### Get song list from YouTube by genre
+POST {{localUrl}}/api/ai/get-youtube-song-list
 Authorization: Bearer 1234
 Content-Type: application/json
 
@@ -99,7 +126,7 @@ Content-Type: application/json
   "artist": "The Beatles"
 }
 
-### Get playlist list from YouTube
+### Get playlist list from YouTube via AI routes
 POST {{localUrl}}/api/ai/get-playlist-list
 Authorization: Bearer 1234
 Content-Type: application/json
@@ -108,7 +135,27 @@ Content-Type: application/json
   "q": "rock classics"
 }
 
-### Get first 10 words of a song's lyrics
+### Get songs from a specific YouTube playlist by ID via AI routes (first 10 songs)
+POST {{localUrl}}/api/ai/get-playlist-songs
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "playlistId": "PLrAd2F5wF_gLgGfKZrflhkhUqjVYN8_qI"
+}
+
+### Get songs from a specific YouTube playlist by ID via AI routes with pagination
+POST {{localUrl}}/api/ai/get-playlist-songs
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "playlistId": "PLrAd2F5wF_gLgGfKZrflhkhUqjVYN8_qI",
+  "skip": 10,
+  "limit": 20
+}
+
+### Get first 10 words of a song's lyrics via AI routes
 POST {{localUrl}}/api/ai/get-song-10-words
 Authorization: Bearer 1234
 Content-Type: application/json
