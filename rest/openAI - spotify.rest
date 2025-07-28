@@ -2,7 +2,7 @@
 @baseUrl = https://be-tan-theta.vercel.app
 
 ### Get Spotify login URL
-POST {{localUrl}}/api/spotify/login
+POST {{baseUrl}}/api/spotify/login
 Authorization: Bearer 1234
 Content-Type: application/json
 
@@ -14,7 +14,7 @@ Authorization: Bearer 1234
 Content-Type: application/json
 
 {
-  "code": "AQD...", 
+  "code": "AQAW248FZWpQsYSciPF8vFjxRsVw8TA5qk1K0uVNRnF92oX-rRzNQviON2L4-UXcUwus2Uj6PcnhZ77CXgp9vxo0rUB9cS_cIL4xF2-RDBdMqZu2DxK3EnM-mfKSXWHmax1ZdEvvmeDledUbncemTTFJHsrRFnsG_pBral7Wl8n6qq4yE_svNNMZU136zY4ExSdc3qp8EPGUq_tdWliaxUo4lUXwDjbQGdZECx2pM2g7fe5pHvvia3XGCEHGK6nMaqRTmHOmvUv_GCAYfOVRg6RILfitHjsJ1cmsuVDrjEDyfdXfaZultqP0DmbOf5DEWZyLK_cblOju1nYGQLeLufhtLLkljIVOA59sKIo&state=7d69e366b4cec53987b99733979e91cb", 
   "state": "your_state_here",
   "userId": "user123"
 }

@@ -40,8 +40,8 @@ exports.handleSpotifyCallback = async ({ code, state, userId }) => {
 
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-    const redirectUri = process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:5000/api/ai/spotify-callback';
-    
+    const redirectUri = process.env.SPOTIFY_REDIRECT_URI || 'https://be-tan-theta.vercel.app/api/spotify/callback';
+
     if (!clientId || !clientSecret) {
       throw new Error('Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET in .env');
     }
