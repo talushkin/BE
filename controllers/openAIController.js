@@ -469,3 +469,4 @@ exports.getSongLyricsSRT = async ({ title, artist }) => {
     throw new Error('Lyrics not found or error occurred.');
   }
 };
+

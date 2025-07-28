@@ -1,0 +1,74 @@
+@localUrl = http://localhost:5000
+@baseUrl = https://be-tan-theta.vercel.app
+
+### Get Spotify login URL
+POST {{localUrl}}/api/spotify/login
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{}
+
+### Spotify Callback - Complete Authentication Flow (saves to MongoDB spotit.users and spotit.tokens)
+POST {{localUrl}}/api/spotify/callback
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "code": "AQD...", 
+  "state": "your_state_here",
+  "userId": "user123"
+}
+
+### Get stored Spotify tokens for a user
+POST {{localUrl}}/api/spotify/tokens
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "userId": "user123"
+}
+
+### Get Spotify user profile
+POST {{localUrl}}/api/spotify/profile
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "accessToken": "BQC..."
+}
+
+### Search Spotify for tracks
+POST {{localUrl}}/api/spotify/search
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "q": "imagine dragons",
+  "type": "track",
+  "limit": 10,
+  "accessToken": "BQC..."
+}
+
+### Search Spotify for artists
+POST {{localUrl}}/api/spotify/search
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "q": "coldplay",
+  "type": "artist",
+  "limit": 5,
+  "accessToken": "BQC..."
+}
+
+### Search Spotify for playlists
+POST {{localUrl}}/api/spotify/search
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "q": "rock classics",
+  "type": "playlist",
+  "limit": 10,
+  "accessToken": "BQC..."
+}

@@ -1,8 +1,18 @@
-
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { getReactQuestion, translateDirectly, createPictureFromText, fillRecipe, getSongListFromOpenAI, getSongListFromYouTube, getSongLyricsSRT, getSongLyricsChords, getPlaylistFromYouTube, getSong10Words } = require("../controllers/openAIController");
+const { 
+  translateDirectly, 
+  createPictureFromText, 
+  fillRecipe, 
+  getSongListFromOpenAI, 
+  getSongListFromYouTube, 
+  getSongLyricsSRT, 
+  getSongLyricsChords, 
+  getPlaylistFromYouTube, 
+  getSong10Words,
+  getReactQuestion
+} = require("../controllers/openAIController");
 // Route for fetching first 10 words of a song's lyrics
 router.post("/get-song-10-words", auth, async (req, res) => {
   try {

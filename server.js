@@ -8,6 +8,7 @@ const swagger = require("./docs/index.js");
 const categoryRoutes = require("./routes/categoriesRoutes");
 const recipeRoutes = require("./routes/recipesRoutes");
 const openAIRoutes = require("./routes/openAIRoutes");
+const spotifyRoutes = require("./routes/spotifyRoutes");
 const logger = require("./middlewares/logger"); // 👈 מוסיפים את ה-logger
 
 const app = express();
@@ -27,6 +28,7 @@ mongoose.connect(connectionString, {
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/ai", openAIRoutes);
+app.use("/api/spotify", spotifyRoutes);
 
 
 const swaggerUiOptions = {
