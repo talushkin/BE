@@ -68,6 +68,49 @@ exports.getSongListFromYouTube = async ({ title, artist, genre }) => {
   }
 };
 
+// Get a specific YouTube playlist by ID (metadata only)
+exports.getPlaylistById = async ({ playlistId }) => {
+  console.log("Fetching YouTube playlist by ID:", playlistId);
+  try {
+    if (!YOUTUBE_API_KEY) throw new Error('Missing YOUTUBE_API_KEY in .env');
+    if (!playlistId) throw new Error('playlistId is required');
+    
+    // Get playlist details
+    const playlistUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails,status&id=${playlistId}&key=${YOUTUBE_API_KEY}`;
+    const playlistRes = await axios.get(playlistUrl);
+    const playlistData = playlistRes.data.items?.[0];
+    
+    if (!playlistData) {
+      throw new Error('Playlist not found');
+    }
+    
+    const now = new Date();
+    const createdAt = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth()+1).padStart(2, '0')}-${now.getFullYear()}`;
+    
+    // Format playlist information
+    const playlist = {
+      id: playlistData.id,
+      title: playlistData.snippet.title,
+      description: playlistData.snippet.description,
+      image: playlistData.snippet.thumbnails.high?.url || playlistData.snippet.thumbnails.default?.url,
+      channelTitle: playlistData.snippet.channelTitle,
+      channelId: playlistData.snippet.channelId,
+      url: `https://www.youtube.com/playlist?list=${playlistData.id}`,
+      itemCount: playlistData.contentDetails.itemCount,
+      privacy: playlistData.status?.privacyStatus,
+      publishedAt: playlistData.snippet.publishedAt,
+      defaultLanguage: playlistData.snippet.defaultLanguage,
+      createdAt
+    };
+    
+    return playlist;
+  } catch (error) {
+    const errorString = typeof error === 'object' ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : String(error);
+    console.error('Error fetching playlist by ID from YouTube:', errorString);
+    throw new Error('Failed to fetch playlist from YouTube: ' + errorString);
+  }
+};
+
 // Get playlist list from YouTube API based on search query (q)
 exports.getPlaylistFromYouTube = async ({ q }) => {
   console.log("Fetching playlists from YouTube with query:", q);

@@ -5,7 +5,8 @@ const {
   getSongListFromYouTube, 
   getPlaylistFromYouTube, 
   getPlaylistFromYouTubePerID,
-  getSong10Words
+  getSong10Words,
+  getPlaylistById
 } = require("../controllers/youTubeController");
 
 // Route for getting a song list by title, artist, or genre from YouTube
@@ -29,6 +30,23 @@ router.post("/get-playlist-list", auth, async (req, res) => {
     }
     const playlists = await getPlaylistFromYouTube({ q });
     res.status(200).json(playlists);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
+  }
+});
+
+// Route for getting a specific YouTube playlist by ID
+router.post("/getPlaylist", auth, async (req, res) => {
+  try {
+    const { playlistId } = req.body;
+    if (!playlistId) {
+      return res.status(400).json({ error: "playlistId is required" });
+    }
+    
+    // Get playlist metadata
+    const playlist = await getPlaylistById({ playlistId });
+    res.status(200).json(playlist);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });

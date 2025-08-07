@@ -15,7 +15,8 @@ const {
   getSongListFromYouTube, 
   getPlaylistFromYouTube, 
   getPlaylistFromYouTubePerID,
-  getSong10Words
+  getSong10Words,
+  getPlaylistById
 } = require("../controllers/youTubeController");
 // Route for fetching lyrics and chords for a song (OpenAI fallback)
 router.post("/get-song-lyrics-chords", auth, async (req, res) => {
@@ -157,6 +158,21 @@ router.post("/get-song-10-words", auth, async (req, res) => {
     }
     const result = await getSong10Words({ artist, title });
     res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
+  }
+});
+
+// Route for fetching YouTube playlist metadata by ID
+router.post("/getPlaylist", auth, async (req, res) => {
+  try {
+    const { playlistId } = req.body;
+    if (!playlistId) {
+      return res.status(400).json({ error: "playlistId is required" });
+    }
+    const playlist = await getPlaylistById({ playlistId });
+    res.status(200).json(playlist);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message || "Internal Server Error", details: error?.response?.data });
