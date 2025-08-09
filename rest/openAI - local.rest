@@ -178,6 +178,150 @@ Authorization: Bearer 1234
 Content-Type: application/json
 
 {
-  "numberOfQuestions": 1,
+  "numberOfQuestions": 10,
   "numberOfPossibleAnswers": 4
+}
+
+### Get React questions avoiding previously asked ones
+POST {{localUrl}}/api/ai/react-questionaire
+Authorization: Bearer 1234
+Content-Type: application/json
+
+{
+  "numberOfQuestions": 5,
+  "numberOfPossibleAnswers": 4,
+  "oldQs": [
+    {
+      "q": "What is the purpose of the useEffect hook?",
+      "answers": [
+        {
+          "text": "To manage component state",
+          "correct": false
+        },
+        {
+          "text": "To perform side effects in function components",
+          "correct": true
+        },
+        {
+          "text": "To optimize rendering performance",
+          "correct": false
+        },
+        {
+          "text": "To handle user input",
+          "correct": false
+        }
+      ],
+      "explanation": "The useEffect hook is used to perform side effects in function components, such as data fetching or subscriptions."
+    },
+    {
+      "q": "What is a controlled component in React?",
+      "answers": [
+        {
+          "text": "A component that manages its own state",
+          "correct": false
+        },
+        {
+          "text": "A component that receives its value from props and notifies changes",
+          "correct": true
+        },
+        {
+          "text": "A component that does not re-render on state changes",
+          "correct": false
+        },
+        {
+          "text": "A component that uses the Context API",
+          "correct": false
+        }
+      ],
+      "explanation": "A controlled component is one that receives its value from props and notifies changes, making it controlled by React."
+    },
+    {
+      "q": "What is prop drilling in React?",
+      "answers": [
+        {
+          "text": "Passing props from parent to child components",
+          "correct": true
+        },
+        {
+          "text": "Using the Context API to avoid passing props",
+          "correct": false
+        },
+        {
+          "text": "Managing state across multiple components",
+          "correct": false
+        },
+        {
+          "text": "Creating components without props",
+          "correct": false
+        }
+      ],
+      "explanation": "Prop drilling refers to the process of passing props from a parent component down to child components, which can become cumbersome."
+    },
+    {
+      "q": "How can you prevent the default action of an event in a React component?",
+      "answers": [
+        {
+          "text": "By calling event.preventDefault()",
+          "correct": true
+        },
+        {
+          "text": "By returning false from the event handler",
+          "correct": false
+        },
+        {
+          "text": "By using a ref",
+          "correct": false
+        },
+        {
+          "text": "By using useEffect",
+          "correct": false
+        }
+      ],
+      "explanation": "You can prevent the default action of an event by calling event.preventDefault() within the event handler."
+    },
+    {
+      "q": "Where is the best place to store reusable hooks in a React application?",
+      "answers": [
+        {
+          "text": "In the components folder",
+          "correct": false
+        },
+        {
+          "text": "In a hooks folder",
+          "correct": true
+        },
+        {
+          "text": "In the same folder as the components that use them",
+          "correct": false
+        },
+        {
+          "text": "In the Redux folder",
+          "correct": false
+        }
+      ],
+      "explanation": "The best practice is to store reusable hooks in a dedicated 'hooks' folder for better organization."
+    },
+    {
+      "q": "What does React.lazy do?",
+      "answers": [
+        {
+          "text": "It optimizes the rendering of components",
+          "correct": false
+        },
+        {
+          "text": "It allows you to dynamically import components",
+          "correct": true
+        },
+        {
+          "text": "It manages component state",
+          "correct": false
+        },
+        {
+          "text": "It creates a context for components",
+          "correct": false
+        }
+      ],
+      "explanation": "React.lazy allows you to dynamically import components, enabling code splitting and optimizing load time."
+    }
+  ]
 }

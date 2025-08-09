@@ -197,8 +197,8 @@ router.post("/get-song-lyrics-srt", auth, async (req, res) => {
 // Route for generating React multiple-choice questions (customizable)
 router.post("/react-questionaire", auth, async (req, res) => {
   try {
-    const { numberOfQuestions = 10, numberOfPossibleAnswers = 4 } = req.body || {};
-    const questions = await getReactQuestion({ numberOfQuestions, numberOfPossibleAnswers });
+    const { numberOfQuestions = 10, numberOfPossibleAnswers = 4, oldQs = [] } = req.body || {};
+    const questions = await getReactQuestion({ numberOfQuestions, numberOfPossibleAnswers, oldQs });
     res.status(200).json(questions);
   } catch (error) {
     console.error(error);

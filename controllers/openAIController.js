@@ -23,7 +23,13 @@ explanation: a string explaining the correct answer.`;
     if (oldQs && oldQs.length > 0) {
       const previousQuestions = oldQs.map(q => q.q || '').filter(q => q.trim() !== '').join('\n- ');
       if (previousQuestions) {
-        prompt += `\n\nIMPORTANT: DO NOT repeat any of these previously asked questions:\n- ${previousQuestions}\n\nMake sure all new questions are completely different from the ones listed above.`;
+        prompt += `\n\nCRITICAL REQUIREMENT: Avoid generating questions that are semantically similar to these previously asked questions:\n- ${previousQuestions}\n\nDO NOT create questions that:
+- Ask about the same React concept using different wording (e.g., "What is React.lazy?" vs "What does React.lazy do?")
+- Cover the same functionality with slightly different phrasing
+- Address the same topic from a similar angle
+- Use synonyms or paraphrasing of existing questions
+
+Generate completely NEW questions about DIFFERENT React concepts, features, or patterns that haven't been covered yet.`;
       }
     }
 
