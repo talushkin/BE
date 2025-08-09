@@ -1,7 +1,8 @@
 // Generate 10 React questions with 4 possible answers (1 correct), with explanations, in the requested format
-exports.getReactQuestion = async ({ numberOfQuestions = 10, numberOfPossibleAnswers = 4 } = {}) => {
+exports.getReactQuestion = async ({ oldQs=[], numberOfQuestions = 10, numberOfPossibleAnswers = 4 } = {}) => {
   try {
-    const prompt = `Generate an array of ${numberOfQuestions} multiple-choice questions focused on React, using the following topics and question styles as a guide. Each question should be clear, relevant, and similar in format and difficulty to these topics:
+    // Create the base prompt
+    let prompt = `Generate an array of ${numberOfQuestions} multiple-choice questions focused on React, using the following topics and question styles as a guide. Each question should be clear, relevant, and similar in format and difficulty to these topics:
 
 Component Basics: correct syntax for functional components, exporting, return purpose, root elements, React.Fragment, JSX, children, null returns
 Props: passing, mutability, required/default values, prop types
@@ -16,8 +17,17 @@ Advanced Concepts: code splitting, React.lazy, Suspense, SSR, hydration
 Each question should be an object with:
 q: the question (string),
 answers: an array of ${numberOfPossibleAnswers} objects, each with { text: string, correct: boolean },
-explanation: a string explaining the correct answer.
-Return only a valid JSON array, do not include markdown, code blocks, or any extra text.`;
+explanation: a string explaining the correct answer.`;
+
+    // Add previous questions to avoid repetition
+    if (oldQs && oldQs.length > 0) {
+      const previousQuestions = oldQs.map(q => q.q || '').filter(q => q.trim() !== '').join('\n- ');
+      if (previousQuestions) {
+        prompt += `\n\nIMPORTANT: DO NOT repeat any of these previously asked questions:\n- ${previousQuestions}\n\nMake sure all new questions are completely different from the ones listed above.`;
+      }
+    }
+
+    prompt += `\n\nReturn only a valid JSON array, do not include markdown, code blocks, or any extra text.`;
     const response = await axios.post(
       `${OPENAI_API_URL}/chat/completions`,
       {
